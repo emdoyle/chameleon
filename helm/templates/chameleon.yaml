@@ -24,15 +24,15 @@ spec:
             name: {{ .Release.Name }}
         imagePullPolicy: Always
         ports:
-        - containerPort: 8080
+        - containerPort: 8888
           name: tcp-chameleon
         readinessProbe:
           tcpSocket:
-            port: 8080
+            port: 8888
           initialDelaySeconds: 5
           periodSeconds: 10
         livenessProbe:
           tcpSocket:
-            port: 8080
+            port: 8888
           initialDelaySeconds: 15
           periodSeconds: 10

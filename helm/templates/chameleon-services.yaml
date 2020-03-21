@@ -6,7 +6,7 @@ metadata:
     developer: {{ .Values.developer | default "emdoyle" | lower | quote }}
 spec:
   ports:
-  - port: 8080
+  - port: 8888
     name: tcp-chameleon
     targetPort: tcp-chameleon
   selector:
