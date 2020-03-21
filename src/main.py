@@ -1,11 +1,12 @@
 import tornado.ioloop
 import tornado.web
-from server import GameStateHandler
+from server import GameStateHandler, RootHandler
 
 
 def make_app():
     return tornado.web.Application([
-        (r"/websocket", GameStateHandler)
+        (r"/websocket", GameStateHandler),
+        (r"/(.*)", RootHandler, {'path': "assets/build/"}),  # TODO: ENV
     ])
 
 
