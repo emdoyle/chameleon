@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app: chameleon
+spec:
+  selector:
+    matchLabels:
+      app: chameleon
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: chameleon
+    spec:
+      # TODO: secrets for DB creds
+      containers:
+      - name: chameleonserver
+        image: emdoyle/chameleon:latest
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: tcp-chameleon
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10

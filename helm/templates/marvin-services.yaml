@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    developer: {{ .Values.developer | default "emdoyle" | lower | quote }}
+spec:
+  ports:
+  - port: 8080
+    name: tcp-chameleon
+    targetPort: tcp-chameleon
+  selector:
+    app: chameleon
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-lb
+  label:
+    developer: {{ .Values.developer | default "emdoyle" | lower | quote }}
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 443
+      targetPort: tcp-chameleon
+      name: https
+  selector:
+    app: chameleon
