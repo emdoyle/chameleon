@@ -10,7 +10,7 @@ $(BUILT): $(SRC_JS) $(PUBLIC_FILES)
 	cd assets/ && yarn build
 	touch $(BUILT)
 
-build: $(BUILT)
+build:
 	docker build . -t $(PROJ_NAME):latest
 
 tag:

@@ -16,6 +16,8 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 RUN mkdir assets/
 COPY --from=frontend-builder /frontend/build/ assets/build
-# COPY python code, install requirements etc.
-# run server
-CMD ["./marvin"]
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+RUN mkdir src
+COPY src/ ./src/
+CMD ["python", "src/main.py"]
