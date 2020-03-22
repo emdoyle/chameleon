@@ -1,7 +1,8 @@
 import sys
 import logging
-from tornado.web import StaticFileHandler
+from tornado.web import StaticFileHandler, RequestHandler, MissingArgumentError
 from tornado.websocket import WebSocketHandler
+from src.db import DBSession, User
 
 logger = logging.getLogger('chameleon')  # TODO: ENV
 logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -24,3 +25,28 @@ class GameStateHandler(WebSocketHandler):
 
     def on_close(self):
         logger.info("on_close")
+
+
+class UserAPIHandler(RequestHandler):
+    def initialize(self):
+        ...
+
+    def get(self):
+        ...
+
+    def post(self):
+        try:
+            username = self.get_body_argument(name='username')
+        except MissingArgumentError:
+            logger.error("Did not receive username.")
+            self.send_error(status_code=400)
+            return
+
+        db_session = DBSession()
+        new_user = User(
+            username=username
+        )
+        logger.info(f"About to create user: {new_user}")
+        db_session.add(new_user)
+        db_session.commit()
+        logger.info("Committed!")

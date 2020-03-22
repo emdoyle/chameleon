@@ -7,11 +7,12 @@ from src.settings import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, sessionmaker
 
 Engine = create_engine(
     f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 )
+DBSession = sessionmaker(bind=Engine)
 
 Base = declarative_base()
 
@@ -19,6 +20,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
+    username = Column(String)
     sessions = relationship("Session", backref="user")
 
 
