@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from "axios";
+import { useHistory } from 'react-router-dom';
 import Grid from "@material-ui/core/Grid/Grid";
 import TextField from "@material-ui/core/TextField/TextField";
 import Input from "@material-ui/core/Input/Input";
@@ -16,17 +17,20 @@ const useStyles = makeStyles(() => ({
 
 
 export default function Games() {
+    const history = useHistory();
     const [gameName, setGameName] = React.useState('');
     const inputClasses = useStyles();
     React.useEffect(() => {
         axios.get('/api/v1/user').then(response => {
             if (response.data.user_id && response.data.game_id) {
-                alert('should redirect to game_id')
+                history.push('/chameleon')
             }
         }).catch(error => console.log(error))
     }, []);
     const handleSubmit = () => {
-        alert('join/create game')
+        axios.post('/api/v1/games', {
+            gamename: gameName
+        }).then(() => history.push('/chameleon')).catch(error => console.log(error))
     };
 
     return (

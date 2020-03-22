@@ -27,8 +27,14 @@ export default function PlayingChameleon() {
     const [userId, setUserId] = React.useState('');
     const [gameId, setGameId] = React.useState('');
     const [yourClue, setYourClue] = React.useState('');
-    const [otherPlayers, setOtherPlayers] = React.useState([]);
-    const [guesses, setGuesses] = React.useState({});
+    const [otherPlayers, setOtherPlayers] = React.useState([
+        {name: 'Evan', id: '1'},
+        {name: 'Isik', id: '2'}
+    ]);
+    const [guesses, setGuesses] = React.useState({
+        '1': 'evans guess',
+        '2': 'isiks guess'
+    });
     React.useEffect(() => {
         axios.get('/api/v1/user').then(response => {
             if (response.data.user_id && response.data.game_id) {

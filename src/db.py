@@ -37,4 +37,5 @@ class Game(Base):
     __tablename__ = 'games'
 
     id = Column(Integer, primary_key=True)
+    name = Column(String)
     sessions = relationship("Session", backref="game")
