@@ -3,7 +3,7 @@ import logging
 from tornado.web import StaticFileHandler, RequestHandler
 from tornado.websocket import WebSocketHandler
 from tornado.escape import json_decode, json_encode
-from src.db import DBSession, User
+from src.db import DBSession, User, Session
 
 logger = logging.getLogger('chameleon')  # TODO: ENV
 logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -32,10 +32,13 @@ class UserAPIHandler(RequestHandler):
     def initialize(self):
         ...
 
-    def get(self):
+    async def get(self):
         ...
 
-    def post(self):
+    async def post(self):
+        if self.get_secure_cookie(name="session_id"):
+            logger.warning("User already has session, logging in as new user now")
+
         try:
             json_data = json_decode(self.request.body)
             username = json_data['username']
@@ -51,6 +54,20 @@ class UserAPIHandler(RequestHandler):
         logger.info(f"About to create user: {new_user}")
         db_session.add(new_user)
         db_session.commit()
-        logger.info("Committed!")
+        logger.info("Committed user!")
+
+        new_session = Session(
+            user_id=new_user.id,
+        )
+        logger.info(f"About to create session: {new_session}")
+        db_session.add(new_session)
+        db_session.commit()
+        logger.info("Committed session!")
+
+        self.set_secure_cookie(
+            name="session_id",
+            value=str(new_session.id)
+        )
+
         self.set_status(status_code=200)
         self.write(json_encode({'success': True}))

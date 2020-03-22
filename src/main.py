@@ -1,5 +1,6 @@
 import tornado.ioloop
 import tornado.web
+from src.settings import COOKIE_SECRET
 from src.server import (
     GameStateHandler,
     UserAPIHandler,
@@ -12,7 +13,7 @@ def make_app():
         (r"/websocket", GameStateHandler),
         (r"/api/v1/user", UserAPIHandler),
         (r"/(.*)", RootHandler, {'path': "assets/build/"}),  # TODO: ENV
-    ])
+    ], cookie_secret=COOKIE_SECRET)
 
 
 if __name__ == '__main__':
