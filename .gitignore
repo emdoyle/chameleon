@@ -1,5 +1,6 @@
 .idea
 .python-version
 assets/node_modules/
+assets/build/
 **/__pycache__/
 secrets.yaml
