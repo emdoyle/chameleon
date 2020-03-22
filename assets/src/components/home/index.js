@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import TextField from '@material-ui/core/TextField';
 import Input from '@material-ui/core/Input';
@@ -15,6 +16,7 @@ const useStyles = makeStyles(() => ({
 }));
 
 export default function HomePage() {
+    const history = useHistory();
     const [username, setUsername] = React.useState('');
     const inputClasses = useStyles();
 
@@ -28,6 +30,7 @@ export default function HomePage() {
             },
         }).then(response => {
             console.log(response.data);
+            history.push("/games");
         }).catch(error => {
             console.log(error);
         })

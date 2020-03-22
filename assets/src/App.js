@@ -10,6 +10,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import HomePage from 'components/home';
+import Games from 'components/games';
 import 'css/App.css';
 
 const useStyles = makeStyles(theme => ({
@@ -31,6 +32,9 @@ function App() {
           </AppBar>
           <div className="App-main">
               <Switch>
+                  <Route path={"/games"}>
+                      <Games/>
+                  </Route>
                   <Route path={"/"}>
                       <HomePage/>
                   </Route>
