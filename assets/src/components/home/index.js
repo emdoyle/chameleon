@@ -2,6 +2,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 import Input from '@material-ui/core/Input';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -37,48 +38,49 @@ export default function HomePage() {
     };
 
     return (
-        <React.Fragment>
-            <Grid
-                container
-                direction="column"
-                justify="center"
-                alignItems="center"
-                spacing={8}
-            >
-                <Grid item>
-                    <img src={logo} className="App-logo" alt="logo" />
-                </Grid>
-                <Grid item>
-                    <Grid
-                        container
-                        direction="row"
-                        justify="center"
-                        alignItems="center"
-                        spacing={4}
-                    >
-                        <Grid item>
-                            <TextField
-                                id="username-text-field"
-                                className={inputClasses.nameInput}
-                                required
-                                label='What is your name?'
-                                variant='filled'
-                                onChange={(event) => setUsername(event.target.value)}
-                            >
-                                <Input
-                                    value={username}
-                                />
-                            </TextField>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                variant='contained'
-                                onClick={handleSubmit}
-                            >Submit</Button>
-                        </Grid>
+        <Grid
+            container
+            direction="column"
+            justify="center"
+            alignItems="center"
+            spacing={8}
+        >
+            <Grid item>
+                <Typography>Make a username!</Typography>
+            </Grid>
+            <Grid item>
+                <img src={logo} className="App-logo" alt="logo" />
+            </Grid>
+            <Grid item>
+                <Grid
+                    container
+                    direction="row"
+                    justify="center"
+                    alignItems="center"
+                    spacing={4}
+                >
+                    <Grid item>
+                        <TextField
+                            id="username-text-field"
+                            className={inputClasses.nameInput}
+                            required
+                            label='What is your name?'
+                            variant='filled'
+                            onChange={(event) => setUsername(event.target.value)}
+                        >
+                            <Input
+                                value={username}
+                            />
+                        </TextField>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            variant='contained'
+                            onClick={handleSubmit}
+                        >Submit</Button>
                     </Grid>
                 </Grid>
             </Grid>
-        </React.Fragment>
+        </Grid>
     )
 }
