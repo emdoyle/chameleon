@@ -2,3 +2,4 @@
 .python-version
 assets/node_modules/
 **/__pycache__/
+secrets.yaml
