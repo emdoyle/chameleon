@@ -26,7 +26,7 @@ export default function HomePage() {
                 history.push("/games");
             }
         }).catch(error => console.log(error))
-    });
+    }, []);
     const [username, setUsername] = React.useState('');
     const inputClasses = useStyles();
 

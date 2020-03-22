@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from "axios";
 import Grid from "@material-ui/core/Grid/Grid";
 import TextField from "@material-ui/core/TextField/TextField";
 import Input from "@material-ui/core/Input/Input";
@@ -17,7 +18,13 @@ const useStyles = makeStyles(() => ({
 export default function Games() {
     const [gameName, setGameName] = React.useState('');
     const inputClasses = useStyles();
-
+    React.useEffect(() => {
+        axios.get('/api/v1/user').then(response => {
+            if (response.data.has_user && response.data.game_id) {
+                alert('should redirect to game_id')
+            }
+        }).catch(error => console.log(error))
+    }, []);
     const handleSubmit = () => {
         alert('join/create game')
     };
