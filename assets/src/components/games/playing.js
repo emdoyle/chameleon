@@ -12,18 +12,27 @@ import Paper from '@material-ui/core/Paper';
 import Input from "@material-ui/core/Input/Input";
 import TextField from "@material-ui/core/TextField/TextField";
 import Button from "@material-ui/core/Button/Button";
-import {makeStyles} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles(() => ({
     clueInput: {
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        minWidth: '40vw'
+    },
+    mainContent: {
+        marginLeft: '2vw',
+        marginRight: '2vw',
+        minWidth: '75vw',
+    },
+    userTable: {
+        minHeight: '65vh'
     }
 }));
 
 
 export default function PlayingChameleon() {
     const history = useHistory();
-    const inputClasses = useStyles();
+    const styleClasses = useStyles();
     const [userId, setUserId] = React.useState('');
     const [gameId, setGameId] = React.useState('');
     const [yourClue, setYourClue] = React.useState('');
@@ -55,59 +64,65 @@ export default function PlayingChameleon() {
         }).catch(error => console.log(error))
     };
     return (
-        <Grid
-            container
-            direction="column"
-            justify="space-between"
-            alignItems="stretch"
-        >
-            <Grid item>
-                <TableContainer component={Paper}>
-                    <Table>
-                        <TableHead>
-                            <TableCell>User</TableCell>
-                            <TableCell>Clue given</TableCell>
-                        </TableHead>
-                        <TableBody>
-                            {otherPlayers.map(player => (
-                                <TableRow key={player.name}>
-                                    <TableCell>{player.name}</TableCell>
-                                    <TableCell>{guesses[player.id] || '...'}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </Grid>
-            <Grid item>
-                <Grid
-                    container
-                    direction="row"
-                    justify="center"
-                    alignItems="baseline"
-                >
+        <div className={styleClasses.mainContent}>
+            <Grid
+                container
+                direction="column"
+                justify="space-between"
+                alignItems="stretch"
+                spacing={4}
+            >
+                <div className={styleClasses.userTable}>
                     <Grid item>
-                        <TextField
-                            id="clue-text-field"
-                            className={inputClasses.clueInput}
-                            required
-                            label='Give a clue!'
-                            variant='filled'
-                            onChange={(event) => setYourClue(event.target.value)}
-                        >
-                            <Input
-                                value={yourClue}
-                            />
-                        </TextField>
+                        <TableContainer component={Paper}>
+                            <Table>
+                                <TableHead>
+                                    <TableCell>User</TableCell>
+                                    <TableCell>Clue given</TableCell>
+                                </TableHead>
+                                <TableBody>
+                                    {otherPlayers.map(player => (
+                                        <TableRow key={player.name}>
+                                            <TableCell>{player.name}</TableCell>
+                                            <TableCell>{guesses[player.id] || '...'}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
                     </Grid>
-                    <Grid item>
-                        <Button
-                            variant='contained'
-                            onClick={submitYourClue}
-                        >Submit</Button>
+                </div>
+                <Grid item>
+                    <Grid
+                        container
+                        direction="row"
+                        justify="center"
+                        alignItems="center"
+                        spacing={4}
+                    >
+                        <Grid item>
+                            <TextField
+                                id="clue-text-field"
+                                className={styleClasses.clueInput}
+                                required
+                                label='Give a clue!'
+                                variant='filled'
+                                onChange={(event) => setYourClue(event.target.value)}
+                            >
+                                <Input
+                                    value={yourClue}
+                                />
+                            </TextField>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                variant='contained'
+                                onClick={submitYourClue}
+                            >Submit</Button>
+                        </Grid>
                     </Grid>
                 </Grid>
             </Grid>
-        </Grid>
+        </div>
     )
 }

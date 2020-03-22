@@ -11,9 +11,15 @@ logger.setLevel(logging.INFO)
 
 
 class RootHandler(StaticFileHandler):
+    def _check_keycard_permission(self):
+        ...
+
     def parse_url_path(self, url_path: str):
         if not url_path or url_path.endswith('/'):
             url_path = url_path + 'index.html'
+        elif 'keycard' in url_path and not self._check_keycard_permission():
+            self.send_error(status_code=403)
+            return
         return url_path
 
 

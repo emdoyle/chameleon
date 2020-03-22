@@ -21,7 +21,7 @@ export default function HomePage() {
     React.useEffect(() => {
         axios.get('/api/v1/user').then(response => {
             if (response.data.user_id && response.data.game_id) {
-                alert('should redirect to game_id')
+                history.push('/chameleon')
             } else if (response.data.user_id){
                 history.push("/games");
             }
@@ -31,15 +31,9 @@ export default function HomePage() {
     const inputClasses = useStyles();
 
     const handleSubmit = () => {
-        axios({
-            method: 'post',
-            url: '/api/v1/user',
-            headers: {},
-            data: {
-                username
-            },
-        }).then(response => {
-            console.log(response.data);
+        axios.post('/api/v1/user', {
+            username
+        }).then(() => {
             history.push("/games");
         }).catch(error => {
             console.log(error);
