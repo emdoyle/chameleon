@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import TextField from '@material-ui/core/TextField';
 import Input from '@material-ui/core/Input';
 import Button from '@material-ui/core/Button';
@@ -18,7 +19,18 @@ export default function HomePage() {
     const inputClasses = useStyles();
 
     const handleSubmit = () => {
-        alert(username)
+        axios({
+            method: 'post',
+            url: '/api/v1/user',
+            headers: {},
+            data: {
+                username
+            },
+        }).then(response => {
+            console.log(response.data);
+        }).catch(error => {
+            console.log(error);
+        })
     };
 
     return (
