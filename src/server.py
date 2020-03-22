@@ -1,7 +1,8 @@
 import sys
 import logging
-from tornado.web import StaticFileHandler, RequestHandler, MissingArgumentError
+from tornado.web import StaticFileHandler, RequestHandler
 from tornado.websocket import WebSocketHandler
+from tornado.escape import json_decode, json_encode
 from src.db import DBSession, User
 
 logger = logging.getLogger('chameleon')  # TODO: ENV
@@ -36,8 +37,9 @@ class UserAPIHandler(RequestHandler):
 
     def post(self):
         try:
-            username = self.get_body_argument(name='username')
-        except MissingArgumentError:
+            json_data = json_decode(self.request.body)
+            username = json_data['username']
+        except (ValueError, KeyError):
             logger.error("Did not receive username.")
             self.send_error(status_code=400)
             return
@@ -51,3 +53,4 @@ class UserAPIHandler(RequestHandler):
         db_session.commit()
         logger.info("Committed!")
         self.set_status(status_code=200)
+        self.write(json_encode({'success': True}))
