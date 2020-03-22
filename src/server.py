@@ -50,3 +50,4 @@ class UserAPIHandler(RequestHandler):
         db_session.add(new_user)
         db_session.commit()
         logger.info("Committed!")
+        self.set_status(status_code=200)
