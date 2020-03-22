@@ -30,6 +30,11 @@ spec:
             secretKeyRef:
               name: chameleonsecrets
               key: DB_PASSWORD
+        - name: COOKIE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: chameleonsecrets
+              key: COOKIE_SECRET
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}

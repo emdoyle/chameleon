@@ -1,6 +1,6 @@
 import tornado.ioloop
 import tornado.web
-from server import GameStateHandler, RootHandler
+from src.server import GameStateHandler, RootHandler
 
 
 def make_app():
