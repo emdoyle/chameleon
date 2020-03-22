@@ -30,8 +30,11 @@ spec:
       - name: {{ .Release.Name }}-postgres
         image: postgres:11
         env:
-          - name: POSTGRES_HOST_AUTH_METHOD
-            value: "trust"
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: chameleonsecrets
+              key: POSTGRES_PASSWORD
         ports:
         - containerPort: 5432
         imagePullPolicy: Always

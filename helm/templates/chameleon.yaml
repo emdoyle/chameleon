@@ -19,6 +19,17 @@ spec:
       containers:
       - name: chameleonserver
         image: emdoyle/chameleon:latest
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: chameleonsecrets
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: chameleonsecrets
+              key: DB_PASSWORD
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}

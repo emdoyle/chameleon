@@ -4,3 +4,5 @@ metadata:
   name: {{ .Release.Name }}
 data:
   DB_HOST: {{ .Release.Name }}-postgres
+  DB_NAME: chameleon
+  DB_PORT: {{ 5432 | quote }}
