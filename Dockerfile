@@ -11,8 +11,7 @@ RUN npm install
 RUN npm run build
 
 # TODO: environment variable to specify build folder
-FROM python:3.8-alpine
-RUN apk --no-cache add ca-certificates
+FROM python:3.8-slim
 WORKDIR /root/
 RUN mkdir assets/
 COPY --from=frontend-builder /frontend/build/ assets/build
@@ -20,4 +19,5 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN mkdir src
 COPY src/ ./src/
+ENV PYTHONPATH=.
 CMD ["python", "src/main.py"]
