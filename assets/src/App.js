@@ -11,6 +11,7 @@ import Typography from '@material-ui/core/Typography';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import HomePage from 'components/home';
 import Games from 'components/games';
+import Chameleon from 'components/games/playing';
 import 'css/App.css';
 
 const useStyles = makeStyles(theme => ({
@@ -34,6 +35,9 @@ function App() {
               <Switch>
                   <Route path={"/games"}>
                       <Games/>
+                  </Route>
+                  <Route path={"/chameleon"}>
+                      <Chameleon/>
                   </Route>
                   <Route path={"/"}>
                       <HomePage/>
