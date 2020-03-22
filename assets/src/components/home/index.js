@@ -18,6 +18,15 @@ const useStyles = makeStyles(() => ({
 
 export default function HomePage() {
     const history = useHistory();
+    React.useEffect(() => {
+        axios.get('/api/v1/user').then(response => {
+            if (response.data.has_user && response.data.game_id) {
+                alert('should redirect to game_id')
+            } else if (response.data.has_user){
+                history.push("/games");
+            }
+        }).catch(error => console.log(error))
+    });
     const [username, setUsername] = React.useState('');
     const inputClasses = useStyles();
 

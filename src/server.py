@@ -33,7 +33,19 @@ class UserAPIHandler(RequestHandler):
         ...
 
     async def get(self):
-        ...
+        session_id = self.get_secure_cookie(name="session_id")
+        if not session_id:
+            logger.info("No secure cookie found for this user.")
+            self.set_status(status_code=200)
+            self.write(json_encode({'has_user': False}))
+            return
+        db_session = DBSession()
+        session = db_session.query(Session).filter_by(id=int(session_id)).first()
+        self.set_status(status_code=200)
+        if session.game_id is not None:
+            self.write(json_encode({'has_user': True, 'game_id': session.game_id}))
+            return
+        self.write(json_encode({'has_user': True}))
 
     async def post(self):
         if self.get_secure_cookie(name="session_id"):
