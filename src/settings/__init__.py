@@ -10,3 +10,8 @@ DB_NAME = env("DB_NAME", "chameleon")
 DB_PASSWORD = env("DB_PASSWORD", "")
 
 COOKIE_SECRET = env("COOKIE_SECRET", "")
+
+CORS_ORIGINS = [
+    'localhost',
+    'evandoyle.net'
+]

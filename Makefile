@@ -1,14 +1,12 @@
-.PHONY: build tag push image deploy logs
+.PHONY: dist build tag push image deploy logs
 PROJ_NAME = chameleon
 SRC_JS = $(wildcard assets/src/*)
 PUBLIC_FILES = $(wildcard assets/public/*)
-BUILT = assets/build/.made
 
-all: $(BUILT)
+all: dist
 
-$(BUILT): $(SRC_JS) $(PUBLIC_FILES)
-	cd assets/ && yarn build
-	touch $(BUILT)
+dist:
+	cd assets/ && yarn dev-build
 
 build:
 	docker build . -t $(PROJ_NAME):latest

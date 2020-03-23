@@ -1,9 +1,11 @@
 import sys
 import logging
+from urllib.parse import urlparse
 from tornado.web import StaticFileHandler, RequestHandler
 from tornado.websocket import WebSocketHandler
 from tornado.escape import json_decode, json_encode
 from src.db import DBSession, User, Session, Game
+from src.settings import CORS_ORIGINS
 
 logger = logging.getLogger('chameleon')  # TODO: ENV
 logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -11,19 +13,15 @@ logger.setLevel(logging.INFO)
 
 
 class RootHandler(StaticFileHandler):
-    def _check_keycard_permission(self):
-        ...
-
     def parse_url_path(self, url_path: str):
-        if not url_path or url_path.endswith('/'):
-            url_path = url_path + 'index.html'
-        elif 'keycard' in url_path and not self._check_keycard_permission():
-            self.send_error(status_code=403)
-            return
-        return url_path
+        return 'index.html'
 
 
 class GameStateHandler(WebSocketHandler):
+    def check_origin(self, origin: str):
+        parsed = urlparse(origin)
+        return parsed.hostname in CORS_ORIGINS
+
     def open(self):
         logger.info("open")
 

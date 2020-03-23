@@ -30,9 +30,14 @@ const useStyles = makeStyles(() => ({
 }));
 
 
+const websocketURL = new URL('/websocket', window.location.href);
+websocketURL.protocol = websocketURL.protocol.replace('http', 'ws');
+
+
 export default function PlayingChameleon() {
     const history = useHistory();
     const styleClasses = useStyles();
+    const [websocket, setWebsocket] = React.useState(null);
     const [userId, setUserId] = React.useState('');
     const [gameId, setGameId] = React.useState('');
     const [yourClue, setYourClue] = React.useState('');
@@ -49,19 +54,30 @@ export default function PlayingChameleon() {
             if (response.data.user_id && response.data.game_id) {
                 setUserId(response.data.user_id);
                 setGameId(response.data.game_id);
-                // also should make websocket connection
+                const ws = new WebSocket(websocketURL.href);
+                ws.onopen = () => ws.send(JSON.stringify({'data': 'open'}));
+                setWebsocket(ws)
             } else {
                 history.push('/')
             }
-        }).catch(error => console.log(error))
+        }).catch(error => console.log(error));
+
+        return () => {
+            if (websocket) {
+                websocket.close()
+            }
+        }
     }, []);
     const submitYourClue = () => {
-        axios.post('api/v1/clues', {
-            userId,
-            clue: yourClue
-        }).then(response => {
-            console.log(response.data)
-        }).catch(error => console.log(error))
+        // axios.post('api/v1/clues', {
+        //     userId,
+        //     clue: yourClue
+        // }).then(response => {
+        //     console.log(response.data)
+        // }).catch(error => console.log(error))
+        if (websocket) {
+            websocket.send(JSON.stringify({'data': 'hello'}))
+        }
     };
     return (
         <div className={styleClasses.mainContent}>

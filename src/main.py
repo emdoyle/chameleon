@@ -14,6 +14,7 @@ def make_app():
         (r"/websocket", GameStateHandler),
         (r"/api/v1/user", UserAPIHandler),
         (r"/api/v1/games", GameAPIHandler),
+        (r"/assets/build/(.*)", tornado.web.StaticFileHandler, {'path': "assets/build/"}),
         (r"/(.*)", RootHandler, {'path': "assets/build/"}),  # TODO: ENV
     ], cookie_secret=COOKIE_SECRET)
 
