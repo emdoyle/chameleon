@@ -6,7 +6,7 @@ from src.settings import (
     DB_PASSWORD
 )
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, JSON, ForeignKey
 from sqlalchemy.orm import relationship, sessionmaker
 
 Engine = create_engine(
@@ -39,3 +39,52 @@ class Game(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String)
     sessions = relationship("Session", backref="game")
+    rounds = relationship("Round", backref="game")
+
+
+class Round(Base):
+    __tablename__ = 'rounds'
+
+    id = Column(Integer, primary_key=True)
+    game_id = Column(Integer, ForeignKey('games.id'))
+    phase = Column(String)
+    completed = Column(Boolean)
+    set_up_phase = relationship("SetUpPhase", backref="round")
+    clue_phase = relationship("CluePhase", backref="round")
+    vote_phase = relationship("VotePhase", backref="round")
+    reveal_phase = relationship("RevealPhase", backref="round")
+
+
+class SetUpPhase(Base):
+    __tablename__ = 'setup_phases'
+
+    id = Column(Integer, primary_key=True)
+    round_id = Column(Integer, ForeignKey('rounds.id'))
+    chameleon_session_id = Column(Integer)  # not using a FKey to avoid linking tables and for on_delete simplicity
+    category = Column(String)
+    big_die_roll = Column(Integer)
+    small_die_roll = Column(Integer)
+
+
+class CluePhase(Base):
+    __tablename__ = 'clue_phases'
+
+    id = Column(Integer, primary_key=True)
+    round_id = Column(Integer, ForeignKey('rounds.id'))
+    clues = Column(JSON)
+
+
+class VotePhase(Base):
+    __tablename__ = 'vote_phases'
+
+    id = Column(Integer, primary_key=True)
+    round_id = Column(Integer, ForeignKey('rounds.id'))
+    votes = Column(JSON)
+
+
+class RevealPhase(Base):
+    __tablename__ = 'reveal_phases'
+
+    id = Column(Integer, primary_key=True)
+    round_id = Column(Integer, ForeignKey('rounds.id'))
+    guess = Column(String)

@@ -45,9 +45,9 @@ export default function PlayingChameleon() {
         {name: 'Evan', id: '1'},
         {name: 'Isik', id: '2'}
     ]);
-    const [guesses, setGuesses] = React.useState({
-        '1': 'evans guess',
-        '2': 'isiks guess'
+    const [clues, setClues] = React.useState({
+        '1': 'evans clue',
+        '2': 'isiks clue'
     });
     React.useEffect(() => {
         axios.get('/api/v1/user').then(response => {
@@ -100,7 +100,7 @@ export default function PlayingChameleon() {
                                     {otherPlayers.map(player => (
                                         <TableRow key={player.name}>
                                             <TableCell>{player.name}</TableCell>
-                                            <TableCell>{guesses[player.id] || '...'}</TableCell>
+                                            <TableCell>{clues[player.id] || '...'}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -120,7 +120,6 @@ export default function PlayingChameleon() {
                             <TextField
                                 id="clue-text-field"
                                 className={styleClasses.clueInput}
-                                required
                                 label='Give a clue!'
                                 variant='filled'
                                 onChange={(event) => setYourClue(event.target.value)}
