@@ -2,23 +2,11 @@ import React from 'react';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import TableContainer from '@material-ui/core/TableContainer';
-import Paper from '@material-ui/core/Paper';
-import Input from "@material-ui/core/Input/Input";
-import TextField from "@material-ui/core/TextField/TextField";
-import Button from "@material-ui/core/Button/Button";
 import { makeStyles } from "@material-ui/core/styles";
+import ClueInput from "components/games/ClueInput";
+import PlayersTable from "components/games/PlayersTable";
 
 const useStyles = makeStyles(() => ({
-    clueInput: {
-        backgroundColor: 'white',
-        minWidth: '40vw'
-    },
     mainContent: {
         marginLeft: '2vw',
         marginRight: '2vw',
@@ -41,7 +29,7 @@ export default function PlayingChameleon() {
     const [userId, setUserId] = React.useState('');
     const [gameId, setGameId] = React.useState('');
     const [yourClue, setYourClue] = React.useState('');
-    const [otherPlayers, setOtherPlayers] = React.useState([
+    const [players, setPlayers] = React.useState([
         {name: 'Evan', id: '1'},
         {name: 'Isik', id: '2'}
     ]);
@@ -52,10 +40,20 @@ export default function PlayingChameleon() {
     React.useEffect(() => {
         axios.get('/api/v1/user').then(response => {
             if (response.data.user_id && response.data.game_id) {
+                console.log('running effect');
                 setUserId(response.data.user_id);
                 setGameId(response.data.game_id);
+                // don't actually need these IDs
                 const ws = new WebSocket(websocketURL.href);
-                ws.onopen = () => ws.send(JSON.stringify({'data': 'open'}));
+                ws.onopen = () => ws.send(JSON.stringify({'data': 'connected'}));
+                ws.onmessage = event => {
+                    const data = JSON.parse(event.data);
+                    setPlayers(data.players || []);
+                    if (data.round && data.round.clue && data.round.clue.clues) {
+                        setClues(data.round.clue.clues)
+                    }
+                };
+                ws.onclose = () => console.log("Figure out how to reconnect");
                 setWebsocket(ws)
             } else {
                 history.push('/')
@@ -69,12 +67,6 @@ export default function PlayingChameleon() {
         }
     }, []);
     const submitYourClue = () => {
-        // axios.post('api/v1/clues', {
-        //     userId,
-        //     clue: yourClue
-        // }).then(response => {
-        //     console.log(response.data)
-        // }).catch(error => console.log(error))
         if (websocket) {
             websocket.send(JSON.stringify({'data': 'hello'}))
         }
@@ -90,52 +82,18 @@ export default function PlayingChameleon() {
             >
                 <div className={styleClasses.userTable}>
                     <Grid item>
-                        <TableContainer component={Paper}>
-                            <Table>
-                                <TableHead>
-                                    <TableCell>User</TableCell>
-                                    <TableCell>Clue given</TableCell>
-                                </TableHead>
-                                <TableBody>
-                                    {otherPlayers.map(player => (
-                                        <TableRow key={player.name}>
-                                            <TableCell>{player.name}</TableCell>
-                                            <TableCell>{clues[player.id] || '...'}</TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                        <PlayersTable
+                            players={players}
+                            clues={clues}
+                        />
                     </Grid>
                 </div>
                 <Grid item>
-                    <Grid
-                        container
-                        direction="row"
-                        justify="center"
-                        alignItems="center"
-                        spacing={4}
-                    >
-                        <Grid item>
-                            <TextField
-                                id="clue-text-field"
-                                className={styleClasses.clueInput}
-                                label='Give a clue!'
-                                variant='filled'
-                                onChange={(event) => setYourClue(event.target.value)}
-                            >
-                                <Input
-                                    value={yourClue}
-                                />
-                            </TextField>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                variant='contained'
-                                onClick={submitYourClue}
-                            >Submit</Button>
-                        </Grid>
-                    </Grid>
+                    <ClueInput
+                        value={yourClue}
+                        onChange={(event) => setYourClue(event.target.value)}
+                        onSubmit={submitYourClue}
+                    />
                 </Grid>
             </Grid>
         </div>
