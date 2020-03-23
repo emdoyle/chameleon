@@ -22,25 +22,11 @@ class RootHandler(StaticFileHandler):
 
 
 class GameStateHandler(WebSocketHandler):
+    waiters = set()
+
     def check_origin(self, origin: str):
         parsed = urlparse(origin)
         return parsed.hostname in CORS_ORIGINS
-
-    def send_initial_game_state(self, db_session: 'DBSession', session: 'Session') -> Dict:
-        first_uncompleted_round = db_session.query(Round).filter(
-            Round.game_id == session.game_id
-        ).filter(Round.completed == false()).first()
-
-        round_dict = self._build_round_dict(current_round=first_uncompleted_round)
-
-        players_in_game = db_session.query(User).join(
-            Session, Session.user_id == User.id
-        ).join(
-            Game, Session.game_id == Game.id
-        ).filter(Session.id == session.id).all()
-        players_dict = self._build_players_dict(players=players_in_game)
-
-        self.write_message({**round_dict, **players_dict})
 
     # TODO: repeated pattern
     @classmethod
@@ -105,6 +91,22 @@ class GameStateHandler(WebSocketHandler):
             ]
         }
 
+    def send_initial_game_state(self, db_session: 'DBSession', session: 'Session'):
+        first_uncompleted_round = db_session.query(Round).filter(
+            Round.game_id == session.game_id
+        ).filter(Round.completed == false()).first()
+
+        round_dict = self._build_round_dict(current_round=first_uncompleted_round)
+
+        players_in_game = db_session.query(User).join(
+            Session, Session.user_id == User.id
+        ).join(
+            Game, Session.game_id == Game.id
+        ).filter(Session.id == session.id).all()
+        players_dict = self._build_players_dict(players=players_in_game)
+
+        self.write_message({**round_dict, **players_dict})
+
     def validate_session_from_cookie(self, db_session: 'DBSession') -> Optional['Session']:
         session_id = self.get_secure_cookie(name="session_id")
         if session_id is None:
@@ -133,12 +135,19 @@ class GameStateHandler(WebSocketHandler):
             return
 
         self.send_initial_game_state(db_session=db_session, session=session)
+        GameStateHandler.waiters.add(self)
+
+    @classmethod
+    def send_updated_game_state(cls):
+        ...
 
     def on_message(self, message):
-        logger.info("on_message:{}".format(message))
+        logger.info("Received message: {}".format(message))
+        # TODO: take message and dispatch
 
     def on_close(self):
-        logger.info("on_close")
+        logger.info("Closing websocket")
+        GameStateHandler.waiters.remove(self)
 
 
 class UserAPIHandler(RequestHandler):
