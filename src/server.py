@@ -1,6 +1,7 @@
 import sys
 import logging
 from typing import Dict, List, Optional
+from collections import defaultdict
 from urllib.parse import urlparse
 from tornado.web import StaticFileHandler, RequestHandler
 from tornado.websocket import WebSocketHandler
@@ -23,6 +24,7 @@ class RootHandler(StaticFileHandler):
 
 class GameStateHandler(WebSocketHandler):
     waiters = set()
+    ready_states = defaultdict(lambda: False)
 
     def check_origin(self, origin: str):
         parsed = urlparse(origin)
@@ -85,7 +87,8 @@ class GameStateHandler(WebSocketHandler):
             'players': [
                 {
                     'id': player.id,
-                    'username': player.username
+                    'username': player.username,
+                    'ready': cls.ready_states[player.id]
                 }
                 for player in players
             ]
@@ -134,6 +137,7 @@ class GameStateHandler(WebSocketHandler):
         if session is None:
             return
 
+        self.player_id = session.user_id
         self.send_initial_game_state(db_session=db_session, session=session)
         GameStateHandler.waiters.add(self)
 
@@ -148,6 +152,8 @@ class GameStateHandler(WebSocketHandler):
     def on_close(self):
         logger.info("Closing websocket")
         GameStateHandler.waiters.remove(self)
+        if hasattr(self, 'player_id') and self.player_id is not None:
+            del GameStateHandler.ready_states[self.player_id]
 
 
 class UserAPIHandler(RequestHandler):
