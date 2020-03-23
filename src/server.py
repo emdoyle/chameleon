@@ -171,9 +171,9 @@ class UserAPIHandler(RequestHandler):
             return
         self.set_status(status_code=200)
         if session.game_id is not None:
-            self.write(json_encode({'user_id': session.user_id, 'game_id': session.game_id}))
+            self.write(json_encode({'has_session': True, 'has_game': True}))
             return
-        self.write(json_encode({'user_id': session.user_id}))
+        self.write(json_encode({'has_session': True}))
 
     async def post(self):
         if self.get_secure_cookie(name="session_id"):

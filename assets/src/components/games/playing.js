@@ -26,24 +26,13 @@ export default function PlayingChameleon() {
     const history = useHistory();
     const styleClasses = useStyles();
     const [websocket, setWebsocket] = React.useState(null);
-    const [userId, setUserId] = React.useState('');
-    const [gameId, setGameId] = React.useState('');
     const [yourClue, setYourClue] = React.useState('');
-    const [players, setPlayers] = React.useState([
-        {name: 'Evan', id: '1'},
-        {name: 'Isik', id: '2'}
-    ]);
-    const [clues, setClues] = React.useState({
-        '1': 'evans clue',
-        '2': 'isiks clue'
-    });
+    const [players, setPlayers] = React.useState([]);
+    const [clues, setClues] = React.useState({});
     React.useEffect(() => {
         axios.get('/api/v1/user').then(response => {
-            if (response.data.user_id && response.data.game_id) {
+            if (response.data.has_session && response.data.has_game) {
                 console.log('running effect');
-                setUserId(response.data.user_id);
-                setGameId(response.data.game_id);
-                // don't actually need these IDs
                 const ws = new WebSocket(websocketURL.href);
                 ws.onopen = () => ws.send(JSON.stringify({'data': 'connected'}));
                 ws.onmessage = event => {

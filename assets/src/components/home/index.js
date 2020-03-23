@@ -20,9 +20,9 @@ export default function HomePage() {
     const history = useHistory();
     React.useEffect(() => {
         axios.get('/api/v1/user').then(response => {
-            if (response.data.user_id && response.data.game_id) {
+            if (response.data.has_session && response.data.has_game) {
                 history.push('/chameleon')
-            } else if (response.data.user_id){
+            } else if (response.data.has_session){
                 history.push("/games");
             }
         }).catch(error => console.log(error))
