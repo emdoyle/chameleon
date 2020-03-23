@@ -6,7 +6,7 @@ PUBLIC_FILES = $(wildcard assets/public/*)
 all: dist
 
 dist:
-	cd assets/ && yarn dev-build
+	cd assets/ && yarn build
 
 build:
 	docker build . -t $(PROJ_NAME):latest
