@@ -7,7 +7,7 @@ import Input from '@material-ui/core/Input';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
-import logo from 'images/logo512.png';
+import logo from '../../images/logo512.png';
 
 
 const useStyles = makeStyles(() => ({
@@ -19,7 +19,7 @@ const useStyles = makeStyles(() => ({
 export default function HomePage() {
     const history = useHistory();
     React.useEffect(() => {
-        axios.get('/api/v1/user').then(response => {
+        axios.get('/api/v1/session').then(response => {
             if (response.data.has_session && response.data.has_game) {
                 history.push('/chameleon')
             } else if (response.data.has_session){

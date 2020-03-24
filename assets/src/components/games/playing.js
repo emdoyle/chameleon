@@ -3,8 +3,8 @@ import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from "@material-ui/core/styles";
-import ClueInput from "components/games/ClueInput";
-import PlayersTable from "components/games/PlayersTable";
+import ClueInput from "./ClueInput";
+import PlayersTable from "./PlayersTable";
 
 const useStyles = makeStyles(() => ({
     mainContent: {
@@ -30,7 +30,7 @@ export default function PlayingChameleon() {
     const [players, setPlayers] = React.useState([]);
     const [clues, setClues] = React.useState({});
     React.useEffect(() => {
-        axios.get('/api/v1/user').then(response => {
+        axios.get('/api/v1/session').then(response => {
             if (response.data.has_session && response.data.has_game) {
                 console.log('running effect');
                 const ws = new WebSocket(websocketURL.href);

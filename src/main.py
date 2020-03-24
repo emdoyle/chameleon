@@ -3,6 +3,7 @@ import tornado.web
 from src.settings import COOKIE_SECRET
 from src.server import (
     GameStateHandler,
+    SessionAPIHandler,
     UserAPIHandler,
     GameAPIHandler,
     RootHandler
@@ -12,6 +13,7 @@ from src.server import (
 def make_app():
     return tornado.web.Application([
         (r"/websocket", GameStateHandler),
+        (r"/api/v1/session", SessionAPIHandler),
         (r"/api/v1/user", UserAPIHandler),
         (r"/api/v1/games", GameAPIHandler),
         (r"/assets/build/(.*)", tornado.web.StaticFileHandler, {'path': "assets/build/"}),

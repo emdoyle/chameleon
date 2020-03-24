@@ -7,7 +7,7 @@ import Input from "@material-ui/core/Input/Input";
 import Button from "@material-ui/core/Button/Button";
 import {makeStyles} from "@material-ui/core";
 import Typography from '@material-ui/core/Typography';
-import logo from "images/logo512.png";
+import logo from "../../images/logo512.png";
 
 const useStyles = makeStyles(() => ({
     nameInput: {
@@ -21,7 +21,7 @@ export default function Games() {
     const [gameName, setGameName] = React.useState('');
     const inputClasses = useStyles();
     React.useEffect(() => {
-        axios.get('/api/v1/user').then(response => {
+        axios.get('/api/v1/session').then(response => {
             if (response.data.has_session && response.data.has_game) {
                 history.push('/chameleon')
             }

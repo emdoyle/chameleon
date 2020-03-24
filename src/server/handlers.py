@@ -1,15 +1,17 @@
 import sys
 import logging
-from typing import Dict, List, Optional
+from typing import Optional
 from collections import defaultdict
 from urllib.parse import urlparse
 from tornado.web import StaticFileHandler, RequestHandler
 from tornado.websocket import WebSocketHandler
 from tornado.escape import json_decode, json_encode
-from sqlalchemy.sql.expression import false
 from src.db import (
-    DBSession, User, Session, Game, Round, SetUpPhase, CluePhase, VotePhase, RevealPhase
+    DBSession, User, Session, Game
 )
+from src.messages.data import OutgoingMessages
+from src.messages.builder import MessageBuilder
+from src.messages.dispatch import MessageDispatch
 from src.settings import CORS_ORIGINS
 
 logger = logging.getLogger('chameleon')  # TODO: ENV
@@ -23,92 +25,18 @@ class RootHandler(StaticFileHandler):
 
 
 class GameStateHandler(WebSocketHandler):
-    waiters = set()
+    waiters = {}
     ready_states = defaultdict(lambda: False)
+
+    @staticmethod
+    def send_outgoing_messages(outgoing_messages: 'OutgoingMessages'):
+        for recipient, messages in outgoing_messages.messages.items():
+            for outgoing_message in messages:
+                GameStateHandler.waiters[recipient].write_message(json_encode(outgoing_message.data))
 
     def check_origin(self, origin: str):
         parsed = urlparse(origin)
         return parsed.hostname in CORS_ORIGINS
-
-    # TODO: repeated pattern
-    @classmethod
-    def _build_reveal_dict(cls, reveal_phase: Optional['RevealPhase']) -> Dict:
-        if reveal_phase is None:
-            return {}
-        return {
-            'guess': reveal_phase.guess
-        }
-
-    @classmethod
-    def _build_vote_dict(cls, vote_phase: Optional['VotePhase']) -> Dict:
-        if vote_phase is None:
-            return {}
-        return {
-            'votes': vote_phase.votes
-        }
-
-    @classmethod
-    def _build_clue_dict(cls, clue_phase: Optional['CluePhase']) -> Dict:
-        if clue_phase is None:
-            return {}
-        return {
-            'clues': clue_phase.clues
-        }
-
-    @classmethod
-    def _build_set_up_dict(cls, set_up_phase: Optional['SetUpPhase']) -> Dict:
-        if set_up_phase is None:
-            return {}
-        return {
-            'category': set_up_phase.category,
-            'big_die_roll': set_up_phase.big_die_roll,
-            'small_die_roll': set_up_phase.small_die_roll
-        }
-
-    @classmethod
-    def _build_round_dict(cls, current_round: Optional['Round']) -> Dict:
-        if current_round is None:
-            return {}
-        return {
-            'round': {
-                'id': current_round.id,
-                'phase': current_round.phase,
-                'completed': current_round.completed,
-                'set_up': cls._build_set_up_dict(current_round.set_up_phase),
-                'clue': cls._build_clue_dict(current_round.clue_phase),
-                'vote': cls._build_vote_dict(current_round.vote_phase),
-                'reveal': cls._build_reveal_dict(current_round.reveal_phase)
-            }
-        }
-
-    @classmethod
-    def _build_players_dict(cls, players: List['User']) -> Dict:
-        return {
-            'players': [
-                {
-                    'id': player.id,
-                    'username': player.username,
-                    'ready': cls.ready_states[player.id]
-                }
-                for player in players
-            ]
-        }
-
-    def send_initial_game_state(self, db_session: 'DBSession', session: 'Session'):
-        first_uncompleted_round = db_session.query(Round).filter(
-            Round.game_id == session.game_id
-        ).filter(Round.completed == false()).first()
-
-        round_dict = self._build_round_dict(current_round=first_uncompleted_round)
-
-        players_in_game = db_session.query(User).join(
-            Session, Session.user_id == User.id
-        ).join(
-            Game, Session.game_id == Game.id
-        ).filter(Session.id == session.id).all()
-        players_dict = self._build_players_dict(players=players_in_game)
-
-        self.write_message({**round_dict, **players_dict})
 
     def validate_session_from_cookie(self, db_session: 'DBSession') -> Optional['Session']:
         session_id = self.get_secure_cookie(name="session_id")
@@ -137,26 +65,52 @@ class GameStateHandler(WebSocketHandler):
         if session is None:
             return
 
-        self.player_id = session.user_id
-        self.send_initial_game_state(db_session=db_session, session=session)
-        GameStateHandler.waiters.add(self)
+        self.session_id = session.id
+        GameStateHandler.waiters[self.session_id] = self
 
-    @classmethod
-    def send_updated_game_state(cls):
-        ...
+        initial_state_message = MessageBuilder.factory(
+            db_session=db_session,
+            ready_states=GameStateHandler.ready_states,  # is this safe?
+        ).create_full_game_state_message(
+            session_id=session.id,
+            game_id=session.game_id,
+        )
+        GameStateHandler.send_outgoing_messages(outgoing_messages=OutgoingMessages(
+            messages={
+                self.session_id: [initial_state_message]
+            }
+        ))
 
     def on_message(self, message):
         logger.info("Received message: {}".format(message))
-        # TODO: take message and dispatch
+        db_session = DBSession()
+        session = self.validate_session_from_cookie(db_session=db_session)
+        if session is None:
+            return
+
+        outgoing_messages = MessageDispatch.handle(
+            message=json_decode(message),
+            db_session=db_session,
+            session=session,
+            ready_states=GameStateHandler.ready_states
+        )
+        GameStateHandler.send_outgoing_messages(outgoing_messages=outgoing_messages)
 
     def on_close(self):
         logger.info("Closing websocket")
-        GameStateHandler.waiters.remove(self)
-        if hasattr(self, 'player_id') and self.player_id is not None:
-            del GameStateHandler.ready_states[self.player_id]
+        if (
+                hasattr(self, 'session_id')
+                and self.session_id is not None
+        ):
+            if self.session_id in GameStateHandler.waiters:
+                del GameStateHandler.waiters[self.session_id]
+            if self.session_id in GameStateHandler.ready_states:
+                del GameStateHandler.ready_states[self.session_id]
+        else:
+            logger.warning("Closed websocket but did not remove self from memory!\nsession_id: %s", self.session_id)
 
 
-class UserAPIHandler(RequestHandler):
+class SessionAPIHandler(RequestHandler):
     async def get(self):
         session_id = self.get_secure_cookie(name="session_id")
         if not session_id:
@@ -175,6 +129,8 @@ class UserAPIHandler(RequestHandler):
             return
         self.write(json_encode({'has_session': True}))
 
+
+class UserAPIHandler(RequestHandler):
     async def post(self):
         if self.get_secure_cookie(name="session_id"):
             logger.warning("User already has session, logging in as new user now")
