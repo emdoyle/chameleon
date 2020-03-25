@@ -29,7 +29,12 @@ export default function Games() {
     }, []);
     const handleSubmit = () => {
         axios.post('/api/v1/games', {
-            gamename: gameName
+            gameName
+        }).then(() => history.push('/chameleon')).catch(error => console.log(error))
+    };
+    const handleJoin = () => {
+        axios.get('api/v1/games', {
+            gameName
         }).then(() => history.push('/chameleon')).catch(error => console.log(error))
     };
 
@@ -72,8 +77,14 @@ export default function Games() {
                     <Grid item>
                         <Button
                             variant='contained'
+                            onClick={handleJoin}
+                        >Join</Button>
+                    </Grid>
+                    <Grid item>
+                        <Button
+                            variant='contained'
                             onClick={handleSubmit}
-                        >Submit</Button>
+                        >Create</Button>
                     </Grid>
                 </Grid>
             </Grid>

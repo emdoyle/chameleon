@@ -34,7 +34,10 @@ class GameStateHandler(WebSocketHandler):
             for outgoing_message in messages:
                 json_data = json_encode(outgoing_message.data)
                 logger.info("Writing message (%s)\nTo recipient %s", json_data, recipient)
-                GameStateHandler.waiters[recipient].write_message(json_encode(outgoing_message.data))
+                try:
+                    GameStateHandler.waiters[recipient].write_message(json_encode(outgoing_message.data))
+                except KeyError:
+                    logger.warning("Recipient %s is not attached to websocket", recipient)
 
     def check_origin(self, origin: str):
         parsed = urlparse(origin)
@@ -172,6 +175,25 @@ class UserAPIHandler(RequestHandler):
 
 
 class GameAPIHandler(RequestHandler):
+    async def get(self):
+        session_id = self.get_secure_cookie(name="session_id")
+        if not session_id:
+            logger.error("Cannot create game without session.")
+            self.send_error(status_code=400)
+            return
+
+        game_name = self.get_argument('gameName', None)
+        db_session = DBSession()
+        existing_game = db_session.query(Game).filter(Game.name == game_name).first()
+        if existing_game is None:
+            logger.error("Could not find game with name %s", game_name)
+            self.send_error(status_code=404)
+            return
+
+        db_session.query(Session).filter(Session.id == int(session_id)).update({'game_id': existing_game.id})
+        db_session.commit()
+        return {'success': True}
+
     async def post(self):
         session_id = self.get_secure_cookie(name="session_id")
         if not session_id:
@@ -181,7 +203,7 @@ class GameAPIHandler(RequestHandler):
 
         try:
             json_data = json_decode(self.request.body)
-            game_name = json_data['gamename']
+            game_name = json_data['gameName']
         except (ValueError, KeyError):
             logger.error("Did not receive game name.")
             self.send_error(status_code=400)
