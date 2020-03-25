@@ -34,7 +34,9 @@ export default function Games() {
     };
     const handleJoin = () => {
         axios.get('api/v1/games', {
-            gameName
+            params: {
+                gameName
+            }
         }).then(() => history.push('/chameleon')).catch(error => console.log(error))
     };
 

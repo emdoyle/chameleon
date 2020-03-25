@@ -7,7 +7,7 @@ from tornado.web import StaticFileHandler, RequestHandler
 from tornado.websocket import WebSocketHandler
 from tornado.escape import json_decode, json_encode
 from src.db import (
-    DBSession, User, Session, Game
+    DBSession, User, Session, Game, Round
 )
 from src.messages.data import OutgoingMessages
 from src.messages.builder import MessageBuilder
@@ -213,10 +213,19 @@ class GameAPIHandler(RequestHandler):
         new_game = Game(
             name=game_name
         )
-        logger.info("About to create game")
         db_session.add(new_game)
         db_session.commit()
         logger.info("Committed game!")
+
+        new_round = Round(
+            game_id=new_game.id,
+            phase='set_up',
+            completed=False,
+        )
+        db_session.add(new_round)
+        db_session.commit()
+        logger.info("Committed round!")
+
         session = db_session.query(Session).filter_by(id=int(session_id)).first()
         session.game_id = new_game.id
         db_session.add(session)

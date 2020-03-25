@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from "@material-ui/core/styles";
+import ReadyInput from "./ReadyInput";
 import ClueInput from "./ClueInput";
 import PlayersTable from "./PlayersTable";
 
@@ -27,6 +28,8 @@ export default function PlayingChameleon() {
     const styleClasses = useStyles();
     const [websocket, setWebsocket] = React.useState(null);
     const [yourClue, setYourClue] = React.useState('');
+    const [ready, setReady] = React.useState(false);
+    const [phase, setPhase] = React.useState('');
     const [players, setPlayers] = React.useState([]);
     const [clues, setClues] = React.useState({});
     React.useEffect(() => {
@@ -40,9 +43,7 @@ export default function PlayingChameleon() {
                 ws.onmessage = event => {
                     const data = JSON.parse(event.data);
                     setPlayers(data.players || []);
-                    if (data.round && data.round.clue && data.round.clue.clues) {
-                        setClues(data.round.clue.clues)
-                    }
+                    setPhase(data.round.phase);
                 };
                 ws.onclose = () => console.log("Figure out how to reconnect");
                 setWebsocket(ws)
@@ -62,6 +63,26 @@ export default function PlayingChameleon() {
             websocket.send(JSON.stringify({'data': 'hello'}))
         }
     };
+
+    const bottomInput = phase === 'set_up' ? (
+        <ReadyInput
+            value={ready}
+            onChange={(event) => {
+                setReady(event.target.checked);
+                websocket.send(JSON.stringify({
+                    'kind': 'ready',
+                    'ready': event.target.checked
+                }))
+            }}
+        />
+    ) : (
+        <ClueInput
+            value={yourClue}
+            onChange={(event) => setYourClue(event.target.value)}
+            onSubmit={submitYourClue}
+        />
+    );
+
     return (
         <div className={styleClasses.mainContent}>
             <Grid
@@ -80,11 +101,7 @@ export default function PlayingChameleon() {
                     </Grid>
                 </div>
                 <Grid item>
-                    <ClueInput
-                        value={yourClue}
-                        onChange={(event) => setYourClue(event.target.value)}
-                        onSubmit={submitYourClue}
-                    />
+                    {bottomInput}
                 </Grid>
             </Grid>
         </div>
