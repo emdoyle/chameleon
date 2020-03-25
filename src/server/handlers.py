@@ -32,6 +32,8 @@ class GameStateHandler(WebSocketHandler):
     def send_outgoing_messages(outgoing_messages: 'OutgoingMessages'):
         for recipient, messages in outgoing_messages.messages.items():
             for outgoing_message in messages:
+                json_data = json_encode(outgoing_message.data)
+                logger.info("Writing message (%s)\nTo recipient %s", json_data, recipient)
                 GameStateHandler.waiters[recipient].write_message(json_encode(outgoing_message.data))
 
     def check_origin(self, origin: str):

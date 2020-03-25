@@ -9,6 +9,5 @@ if TYPE_CHECKING:
 
 
 class ClueMessageHandler(BaseMessageHandler):
-    @classmethod
-    def handle(cls, message: Dict, session: 'Session') -> 'OutgoingMessages':
+    def handle(self, message: Dict, session: 'Session') -> 'OutgoingMessages':
         ...
