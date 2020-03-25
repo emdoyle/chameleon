@@ -64,24 +64,35 @@ export default function PlayingChameleon() {
         }
     };
 
-    const bottomInput = phase === 'set_up' ? (
-        <ReadyInput
-            value={ready}
-            onChange={(event) => {
-                setReady(event.target.checked);
-                websocket.send(JSON.stringify({
-                    'kind': 'ready',
-                    'ready': event.target.checked
-                }))
-            }}
-        />
-    ) : (
-        <ClueInput
-            value={yourClue}
-            onChange={(event) => setYourClue(event.target.value)}
-            onSubmit={submitYourClue}
-        />
-    );
+    // dictionary or other structured data?
+    const getPrimaryInput = () => {
+        if (!phase) {
+            return <React.Fragment />
+        }
+        if (phase === 'set_up') {
+            return (
+                <ReadyInput
+                    value={ready}
+                    onChange={(event) => {
+                        setReady(event.target.checked);
+                        websocket.send(JSON.stringify({
+                            'kind': 'ready',
+                            'ready': event.target.checked
+                        }))
+                    }}
+                />
+            )
+        }
+        if (phase === 'clues') {
+            return (
+                <ClueInput
+                    value={yourClue}
+                    onChange={(event) => setYourClue(event.target.value)}
+                    onSubmit={submitYourClue}
+                />
+            )
+        }
+    };
 
     return (
         <div className={styleClasses.mainContent}>
@@ -101,7 +112,7 @@ export default function PlayingChameleon() {
                     </Grid>
                 </div>
                 <Grid item>
-                    {bottomInput}
+                    {getPrimaryInput()}
                 </Grid>
             </Grid>
         </div>
