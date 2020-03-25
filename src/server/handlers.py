@@ -84,6 +84,7 @@ class GameStateHandler(WebSocketHandler):
                 self.session_id: [initial_state_message]
             }
         ))
+        db_session.close()
 
     def on_message(self, message):
         logger.info("Received message: {}".format(message))
@@ -99,6 +100,7 @@ class GameStateHandler(WebSocketHandler):
             ready_states=GameStateHandler.ready_states
         )
         GameStateHandler.send_outgoing_messages(outgoing_messages=outgoing_messages)
+        db_session.close()
 
     def on_close(self):
         logger.info("Closing websocket")
