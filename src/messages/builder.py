@@ -99,7 +99,6 @@ class MessageBuilder:
 
     def create_full_game_state_message(
             self,
-            session_id: int,
             game_id: int,
     ) -> 'OutgoingMessage':
         first_uncompleted_round = self.db_session.query(Round).filter(
@@ -110,9 +109,9 @@ class MessageBuilder:
 
         players_in_game = self.db_session.query(User).join(
             Session, Session.user_id == User.id
-        ).join(
-            Game, Session.game_id == Game.id
-        ).filter(Session.id == session_id).all()
+        ).filter(
+            Session.game_id == game_id
+        ).all()
         players_dict = self._build_players_dict(players=players_in_game)
 
         return OutgoingMessage(

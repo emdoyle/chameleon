@@ -21,7 +21,6 @@ class ReadyMessageHandler(BaseMessageHandler):
         self.ready_states[session.id] = ready_state
         sessions_in_game = self._get_sessions_in_game(session.game_id)
         full_game_state_message = self.message_builder.create_full_game_state_message(
-            session_id=session.id,
             game_id=session.game_id
         )  # inefficient
         return OutgoingMessages(

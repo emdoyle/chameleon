@@ -16,7 +16,6 @@ class PlayerMessageHandler(BaseMessageHandler):
         # TODO: any other messages like this?
 
         full_game_state_message = self.message_builder.create_full_game_state_message(
-            session_id=session.id,
             game_id=session.game_id
         )
         return OutgoingMessages(

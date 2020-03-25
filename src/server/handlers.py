@@ -77,8 +77,7 @@ class GameStateHandler(WebSocketHandler):
             db_session=db_session,
             ready_states=GameStateHandler.ready_states,  # is this safe?
         ).create_full_game_state_message(
-            session_id=session.id,
-            game_id=session.game_id,
+            game_id=session.game_id
         )
         GameStateHandler.send_outgoing_messages(outgoing_messages=OutgoingMessages(
             messages={
