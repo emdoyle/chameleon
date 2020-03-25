@@ -35,8 +35,7 @@ export default function PlayingChameleon() {
                 console.log('running effect');
                 const ws = new WebSocket(websocketURL.href);
                 ws.onopen = () => ws.send(JSON.stringify({
-                    'kind': 'ready',
-                    'ready': true
+                    'kind': 'players'
                 }));
                 ws.onmessage = event => {
                     const data = JSON.parse(event.data);

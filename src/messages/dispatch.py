@@ -1,5 +1,6 @@
-from typing import Dict, Set, TYPE_CHECKING
+from typing import Dict, TYPE_CHECKING
 from src.messages.handlers import (
+    PlayerMessageHandler,
     VoteMessageHandler,
     ReadyMessageHandler,
     ClueMessageHandler,
@@ -17,6 +18,7 @@ if TYPE_CHECKING:
 
 class MessageDispatch:
     HANDLERS = {
+        'players': PlayerMessageHandler,
         'ready': ReadyMessageHandler,
         'vote': VoteMessageHandler,
         'clue': ClueMessageHandler,
