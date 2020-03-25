@@ -134,6 +134,7 @@ class SessionAPIHandler(RequestHandler):
             self.write(json_encode({'has_session': True, 'has_game': True}))
             return
         self.write(json_encode({'has_session': True}))
+        db_session.close()
 
 
 class UserAPIHandler(RequestHandler):
@@ -193,6 +194,7 @@ class GameAPIHandler(RequestHandler):
 
         db_session.query(Session).filter(Session.id == int(session_id)).update({'game_id': existing_game.id})
         db_session.commit()
+        db_session.close()
         return {'success': True}
 
     async def post(self):
@@ -235,3 +237,4 @@ class GameAPIHandler(RequestHandler):
 
         self.set_status(status_code=200)
         self.write(json_encode({'success': True}))
+        db_session.close()
