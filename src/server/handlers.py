@@ -7,7 +7,8 @@ from tornado.web import StaticFileHandler, RequestHandler
 from tornado.websocket import WebSocketHandler
 from tornado.escape import json_decode, json_encode
 from src.db import (
-    DBSession, User, Session, Game, Round
+    DBSession, User, Session, Game, Round,
+    SetUpPhase, CluePhase, VotePhase, RevealPhase
 )
 from src.messages.data import OutgoingMessages
 from src.messages.builder import MessageBuilder
@@ -213,6 +214,17 @@ class GameAPIHandler(RequestHandler):
             return
 
         db_session = DBSession()
+        self._init_game(session_id=int(session_id), game_name=game_name, db_session=db_session)
+        self.set_status(status_code=200)
+        self.write(json_encode({'success': True}))
+        db_session.close()
+
+    def _init_game(
+            self,
+            session_id: int,
+            game_name: str,
+            db_session: 'DBSession'
+    ):
         new_game = Game(
             name=game_name
         )
@@ -222,19 +234,20 @@ class GameAPIHandler(RequestHandler):
 
         new_round = Round(
             game_id=new_game.id,
-            phase='set_up',
-            completed=False,
         )
         db_session.add(new_round)
         db_session.commit()
         logger.info("Committed round!")
 
-        session = db_session.query(Session).filter_by(id=int(session_id)).first()
+        db_session.add(SetUpPhase(round_id=new_round.id))
+        db_session.add(CluePhase(round_id=new_round.id))
+        db_session.add(VotePhase(round_id=new_round.id))
+        db_session.add(RevealPhase(round_id=new_round.id))
+        db_session.commit()
+        logger.info("Committed phases!")
+
+        session = db_session.query(Session).filter_by(id=session_id).first()
         session.game_id = new_game.id
         db_session.add(session)
         db_session.commit()
         logger.info(f"Added game_id: {new_game.id} to session with id: {session.id}")
-
-        self.set_status(status_code=200)
-        self.write(json_encode({'success': True}))
-        db_session.close()

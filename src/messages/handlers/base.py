@@ -4,13 +4,13 @@ from src.db import (
     Session
 )
 from src.messages.builder import MessageBuilder
+from ..data import OutgoingMessages
 
 if TYPE_CHECKING:
     from tornado.websocket import WebSocketHandler
     from src.db import (
         DBSession
     )
-    from ..data import OutgoingMessages
 
 
 class AbstractMessageHandler(ABC):

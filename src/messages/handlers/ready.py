@@ -17,17 +17,6 @@ logger = logging.getLogger('chameleon')
 
 
 class ReadyMessageHandler(BaseMessageHandler):
-    NORMAL_MESSAGE = OutgoingMessage(
-        data={
-            'assignment': 'normal'
-        }
-    )
-    CHAMELEON_MESSAGE = OutgoingMessage(
-        data={
-            'assignment': 'chameleon'
-        }
-    )
-
     def handle(self, message: Dict, session: 'Session') -> 'OutgoingMessages':
         if message['kind'] != 'ready':  # TODO: constants
             raise ValueError("ReadyMessageHandler expects messages of kind 'ready'")
@@ -39,15 +28,11 @@ class ReadyMessageHandler(BaseMessageHandler):
 
         self.ready_states[session.id] = ready_state
         if all(self.ready_states.values()):
-            full_ready_messages = self._handle_full_ready(session.game_id)
-        else:
-            full_ready_messages = OutgoingMessages()
+            self._handle_full_ready(session.game_id)
 
-        return self._default_messages(game_id=session.game_id, session_id=session.id).merge(
-            full_ready_messages
-        )
+        return self._default_messages(game_id=session.game_id, session_id=session.id)
 
-    def _handle_full_ready(self, game_id: int) -> 'OutgoingMessages':
+    def _handle_full_ready(self, game_id: int) -> None:
         # TODO: cache this in thread
         set_up_phase = self.db_session.query(SetUpPhase).join(
             Round, SetUpPhase.round_id == Round.id
@@ -68,18 +53,10 @@ class ReadyMessageHandler(BaseMessageHandler):
         set_up_phase.small_die_roll = dice_rolls[1]
         set_up_phase.chameleon_session_id = self._pick_chameleon(session_ids_in_game)
         self.db_session.add(set_up_phase)
+        game_round = self.db_session.query(Round).filter(Round.id == set_up_phase.round_id).first()
+        game_round.phase = 'clue'
+        self.db_session.add(game_round)
         self.db_session.commit()
-
-        return OutgoingMessages(
-            messages={
-                session_id: (
-                    self.NORMAL_MESSAGE
-                    if session_id != set_up_phase.chameleon_session_id
-                    else self.CHAMELEON_MESSAGE
-                )
-                for session_id in session_ids_in_game
-            }
-        )
 
     def _pick_category(self) -> str:
         logger.debug('Category chosen: %s', 'default')
