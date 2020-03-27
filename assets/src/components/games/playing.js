@@ -8,14 +8,15 @@ import ClueInput from "./ClueInput";
 import PlayersTable from "./PlayersTable";
 
 const useStyles = makeStyles(() => ({
-    mainContent: {
-        marginLeft: '2vw',
-        marginRight: '2vw',
+    userTable: {
+        minHeight: '65vh',
         minWidth: '75vw',
     },
-    userTable: {
-        minHeight: '65vh'
-    }
+    footer: {
+        minHeight: '15vh',
+        minWidth: '100vw',
+        backgroundColor: 'white'
+    },
 }));
 
 
@@ -95,26 +96,26 @@ export default function PlayingChameleon() {
     };
 
     return (
-        <div className={styleClasses.mainContent}>
-            <Grid
-                container
-                direction="column"
-                justify="space-between"
-                alignItems="stretch"
-                spacing={4}
-            >
-                <div className={styleClasses.userTable}>
-                    <Grid item>
-                        <PlayersTable
-                            players={players}
-                            clues={clues}
-                        />
-                    </Grid>
-                </div>
+        <Grid
+            container
+            direction="column"
+            justify="space-between"
+            alignItems="center"
+            spacing={4}
+        >
+            <div className={styleClasses.userTable}>
+                <Grid item>
+                    <PlayersTable
+                        players={players}
+                        clues={clues}
+                    />
+                </Grid>
+            </div>
+            <div className={styleClasses.footer}>
                 <Grid item>
                     {getPrimaryInput()}
                 </Grid>
-            </Grid>
-        </div>
+            </div>
+        </Grid>
     )
 }
