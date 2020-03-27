@@ -137,6 +137,18 @@ class SessionAPIHandler(RequestHandler):
         self.write(json_encode({'has_session': True}))
         db_session.close()
 
+    async def post(self):
+        session_id = self.get_secure_cookie(name="session_id")
+        db_session = DBSession()
+        if session_id:
+            session = db_session.query(Session).filter(Session.id == int(session_id)).first()
+            if session:
+                db_session.delete(session)
+                logger.debug("Removed session %s from the DB", session_id)
+        self.clear_cookie(name="session_id")
+        logger.debug("Cleared cookie for session %s", session_id)
+        self.set_status(status_code=200)
+
 
 class UserAPIHandler(RequestHandler):
     async def post(self):

@@ -12,25 +12,38 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import HomePage from 'components/home';
 import Games from 'components/games';
 import Chameleon from 'components/games/playing';
+import LeaveSessionButton from 'components/utils/LeaveSessionButton';
 import 'css/App.css';
 
 const useStyles = makeStyles(theme => ({
     menuIconPadRight: {
         marginRight: theme.spacing(2),
     },
+    toolbarRoot: {
+        flexGrow: 1,
+    },
+    siteTitle: {
+        flexGrow: 1,
+        textAlign: 'left',
+    },
 }));
 
 function App() {
-  const classes = useStyles();
+  const styleClasses = useStyles();
   return (
       <Router>
           <div className="App">
-          <AppBar color='primary' position='static'>
-              <Toolbar>
-                  <VisibilityIcon className={classes.menuIconPadRight} />
-                  <Typography>Chameleon</Typography>
-              </Toolbar>
-          </AppBar>
+              <div className={styleClasses.toolbarRoot}>
+              <AppBar color='primary' position='static'>
+                  <Toolbar>
+                      <VisibilityIcon className={styleClasses.menuIconPadRight} />
+                      <Typography
+                          className={styleClasses.siteTitle}
+                      >Chameleon</Typography>
+                      <LeaveSessionButton/>
+                  </Toolbar>
+              </AppBar>
+              </div>
           <div className="App-main">
               <Switch>
                   <Route path={"/games"}>
