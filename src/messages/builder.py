@@ -105,6 +105,7 @@ class MessageBuilder:
                 and current_round.set_up_phase
                 and current_round.set_up_phase.chameleon_session_id == session_id
             ):
+                # TODO: this is oversharing since `session_id` is not the recipient
                 logger.debug("Showing session %s that they are the chameleon!", session_id)
                 entry['chameleon'] = True
             result['players'].append(entry)
