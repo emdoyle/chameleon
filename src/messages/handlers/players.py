@@ -14,9 +14,10 @@ class PlayerMessageHandler(BaseMessageHandler):
             raise ValueError("PlayerMessageHandler expects messages of kind 'players'")
 
         # TODO: any other messages like this?
+        # TODO: need to tell a player about cham status individually!
 
         full_game_state_message = self.message_builder.create_full_game_state_message(
-            game_id=session.game_id
+            session_id=session.id, game_id=session.game_id
         )
         return OutgoingMessages(
             messages={

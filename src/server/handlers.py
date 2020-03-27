@@ -25,6 +25,43 @@ class RootHandler(StaticFileHandler):
         return 'index.html'
 
 
+class KeycardHandler(StaticFileHandler):
+    def validate_session_from_cookie(self, db_session: 'DBSession') -> Optional['Session']:
+        session_id = self.get_secure_cookie(name="session_id")
+        if session_id is None:
+            logger.error("No session, no keycard.")
+            return None
+        current_session = db_session.query(Session).filter(Session.id == int(session_id)).first()
+
+        if current_session is None:
+            logger.error("Session no longer exists in DB.")
+            return None
+
+        if current_session.game_id is None:
+            logger.error("No game attached to this session, no keycard.")
+            return None
+        return current_session
+
+    async def get(self, path: str, include_body: bool = True):
+        db_session = DBSession()
+        validated_session = self.validate_session_from_cookie(db_session)
+        if not validated_session:
+            self.set_status(status_code=404)
+            return
+        current_round = db_session.query(Round).join(Game, Game.id == Round.game_id).filter(
+            Game.id == validated_session.game_id
+        ).first()
+        if (
+            current_round.phase == 'set_up'  # TODO: should _really_ be an ordered Enum
+            or current_round.set_up_phase.chameleon_session_id == validated_session.id
+        ):
+            self.set_status(status_code=404)
+            logger.error("Not the right player or time in the game for a keycard.")
+            return
+        logger.debug('%s', path)
+        return super().get(path, include_body=include_body)
+
+
 class GameStateHandler(WebSocketHandler):
     waiters = {}
     ready_states = defaultdict(lambda: False)
@@ -78,6 +115,7 @@ class GameStateHandler(WebSocketHandler):
             db_session=db_session,
             ready_states=GameStateHandler.ready_states,  # is this safe?
         ).create_full_game_state_message(
+            session_id=session.id,
             game_id=session.game_id
         )
         GameStateHandler.send_outgoing_messages(outgoing_messages=OutgoingMessages(

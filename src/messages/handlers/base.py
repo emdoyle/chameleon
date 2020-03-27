@@ -55,7 +55,7 @@ class BaseMessageHandler(AbstractMessageHandler):
     def _default_messages(self, game_id: int, session_id: int, filter_self: bool = True) -> 'OutgoingMessages':
         sessions_in_game = self._get_sessions_in_game(game_id)
         full_game_state_message = self.message_builder.create_full_game_state_message(
-            game_id=game_id
+            session_id=session_id, game_id=game_id
         )  # inefficient
         return OutgoingMessages(
             messages={

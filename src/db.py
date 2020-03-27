@@ -21,7 +21,7 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String)
-    sessions = relationship("Session", backref="user")
+    session = relationship("Session", uselist=False, backref="user")
 
 
 class Session(Base):

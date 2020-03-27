@@ -6,7 +6,8 @@ from src.server import (
     SessionAPIHandler,
     UserAPIHandler,
     GameAPIHandler,
-    RootHandler
+    RootHandler,
+    KeycardHandler
 )
 
 
@@ -16,6 +17,8 @@ def make_app():
         (r"/api/v1/session", SessionAPIHandler),
         (r"/api/v1/user", UserAPIHandler),
         (r"/api/v1/games", GameAPIHandler),
+        (r"/(assets/public/keycard.jpeg)", KeycardHandler, {'path': "assets/public/keycard.jpeg"}),  # TODO: ENV
+        (r"/(assets/build/keycard.jpeg)", KeycardHandler, {'path': "assets/build/keycard.jpeg"}),
         (r"/assets/build/(.*)", tornado.web.StaticFileHandler, {'path': "assets/build/"}),
         (r"/(.*)", RootHandler, {'path': "assets/build/"}),  # TODO: ENV
     ], cookie_secret=COOKIE_SECRET)

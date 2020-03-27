@@ -1,11 +1,11 @@
+import logging
 from typing import Dict, List, Optional, TYPE_CHECKING
 from sqlalchemy.sql.expression import false
 from src.db import (
     DBSession,
     User,
     Round,
-    Session,
-    Game
+    Session
 )
 from .data import OutgoingMessage
 
@@ -16,6 +16,8 @@ if TYPE_CHECKING:
         CluePhase,
         SetUpPhase
     )
+
+logger = logging.getLogger('chameleon')
 
 
 class MessageBuilder:
@@ -85,20 +87,32 @@ class MessageBuilder:
             }
         }
 
-    def _build_players_dict(self, players: List['User']) -> Dict:
-        return {
-            'players': [
-                {
-                    'id': player.id,
-                    'username': player.username,
-                    'ready': self.ready_states[player.id]
-                }
-                for player in players
-            ]
-        }
+    def _build_players_dict(
+            self,
+            players: List['User'],
+            session_id: int,
+            current_round: 'Round'
+    ) -> Dict:
+        result = {'players': []}
+        for player in players:
+            entry = {
+                'id': player.id,
+                'username': player.username,
+                'ready': self.ready_states[player.id]
+            }
+            if (
+                session_id == player.session.id
+                and current_round.set_up_phase
+                and current_round.set_up_phase.chameleon_session_id == session_id
+            ):
+                logger.debug("Showing session %s that they are the chameleon!", session_id)
+                entry['chameleon'] = True
+            result['players'].append(entry)
+        return result
 
     def create_full_game_state_message(
             self,
+            session_id: int,
             game_id: int,
     ) -> 'OutgoingMessage':
         first_uncompleted_round = self.db_session.query(Round).filter(
@@ -112,7 +126,11 @@ class MessageBuilder:
         ).filter(
             Session.game_id == game_id
         ).all()
-        players_dict = self._build_players_dict(players=players_in_game)
+        players_dict = self._build_players_dict(
+            players=players_in_game,
+            session_id=session_id,
+            current_round=first_uncompleted_round
+        )
 
         return OutgoingMessage(
             data={**round_dict, **players_dict},
