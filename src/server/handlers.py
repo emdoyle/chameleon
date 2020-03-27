@@ -17,7 +17,7 @@ from src.settings import CORS_ORIGINS
 
 logger = logging.getLogger('chameleon')  # TODO: ENV
 logger.addHandler(logging.StreamHandler(sys.stdout))
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 class RootHandler(StaticFileHandler):
@@ -144,6 +144,7 @@ class SessionAPIHandler(RequestHandler):
             session = db_session.query(Session).filter(Session.id == int(session_id)).first()
             if session:
                 db_session.delete(session)
+                db_session.commit()
                 logger.debug("Removed session %s from the DB", session_id)
         self.clear_cookie(name="session_id")
         logger.debug("Cleared cookie for session %s", session_id)

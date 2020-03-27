@@ -52,7 +52,7 @@ class BaseMessageHandler(AbstractMessageHandler):
     def _get_sessions_in_game(self, game_id: int) -> Iterable['Session']:
         return self.db_session.query(Session).filter(Session.game_id == game_id).all()
 
-    def _default_messages(self, game_id: int, session_id: int) -> 'OutgoingMessages':
+    def _default_messages(self, game_id: int, session_id: int, filter_self: bool = True) -> 'OutgoingMessages':
         sessions_in_game = self._get_sessions_in_game(game_id)
         full_game_state_message = self.message_builder.create_full_game_state_message(
             game_id=game_id
@@ -61,6 +61,6 @@ class BaseMessageHandler(AbstractMessageHandler):
             messages={
                 session_in_game.id: [full_game_state_message]
                 for session_in_game in sessions_in_game
-                if session_in_game.id != session_id
+                if (not filter_self) or session_in_game.id != session_id
             }
         )
