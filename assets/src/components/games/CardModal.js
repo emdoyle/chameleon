@@ -18,6 +18,13 @@ const useStyles = makeStyles(theme => ({
 
 export default function CardModal(props) {
     const styleClasses = useStyles();
+    const [imageFailed, setImageFailed] = React.useState(false);
+
+    const handleImageLoadError = error => {
+        console.log(error);
+        setImageFailed(true);
+    };
+
     return (
         <Modal
             open={props.open}
@@ -25,7 +32,9 @@ export default function CardModal(props) {
             disableAutoFocus
         >
             <div className={styleClasses.modal}>
-                <p>Hey!</p>
+                {!Boolean(imageFailed) && (
+                    <img alt="Could not load" onError={handleImageLoadError} src={props.imgSrc} />
+                )}
             </div>
         </Modal>
     )

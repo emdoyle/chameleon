@@ -10,11 +10,12 @@ import GuessInput from "./GuessInput";
 import VoteInput from "./VoteInput";
 import PlayersTable from "./PlayersTable";
 import CardModal from "./CardModal";
+import CategoryCard from "./CategoryCard";
 
 const useStyles = makeStyles(() => ({
-    userTable: {
-        minHeight: '65vh',
-        minWidth: '75vw',
+    mainContent: {
+        height: '65vh',
+        width: '100vw',
     },
     footer: {
         minHeight: '25vh',
@@ -25,6 +26,14 @@ const useStyles = makeStyles(() => ({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    userTable: {
+        minHeight: '100%',
+        minWidth: '40%'
+    },
+    categoryCard: {
+        minHeight: '100%',
+        maxWidth: '45%'
+    }
 }));
 
 
@@ -46,6 +55,9 @@ export default function PlayingChameleon() {
     const [clues, setClues] = React.useState({});
     const [showModalButton, setShowModalButton] = React.useState(true);
     const [showModal, setShowModal] = React.useState(false);
+    const [cardImagePath, setCardImagePath] = React.useState('chameleon_card.jpeg');  // remove later
+    const [showCategoryCard, setShowCategoryCard] = React.useState(true);
+    const [categoryImagePath, setCategoryImagePath] = React.useState('category.jpeg');  // remove later
     React.useEffect(() => {
         axios.get('/api/v1/session').then(response => {
             if (response.data.has_session && response.data.has_game) {
@@ -142,12 +154,30 @@ export default function PlayingChameleon() {
                 justify="space-between"
                 alignItems="center"
             >
-                <div className={styleClasses.userTable}>
+                <div className={styleClasses.mainContent}>
                     <Grid item>
-                        <PlayersTable
-                            players={players}
-                            clues={clues}
-                        />
+                        <Grid
+                            container
+                            direction="row"
+                            justify="space-around"
+                            alignItems="center"
+                        >
+                            <div className={styleClasses.userTable}>
+                                <Grid item>
+                                    <PlayersTable
+                                        players={players}
+                                        clues={clues}
+                                    />
+                                </Grid>
+                            </div>
+                            {showCategoryCard && ( // should probably just use gameState and calculate the rest of this stuff
+                                <div className={styleClasses.categoryCard}>
+                                    <Grid item>
+                                        <CategoryCard imgSrc={categoryImagePath} />
+                                    </Grid>
+                                </div>
+                            )}
+                        </Grid>
                     </Grid>
                 </div>
                 <div className={styleClasses.footer}>
@@ -166,6 +196,7 @@ export default function PlayingChameleon() {
             </Grid>
             <CardModal
                 open={showModal}
+                imgSrc={cardImagePath}
                 onClose={() => setShowModal(false)}
             />
         </React.Fragment>
