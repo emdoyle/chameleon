@@ -49,6 +49,7 @@ class Round(Base):
     game_id = Column(Integer, ForeignKey('games.id'))
     phase = Column(String, default='set_up')
     completed = Column(Boolean, default=False)
+    winner = Column(String)
     set_up_phase = relationship("SetUpPhase", uselist=False, backref="round")
     clue_phase = relationship("CluePhase", uselist=False, backref="round")
     vote_phase = relationship("VotePhase", uselist=False, backref="round")
