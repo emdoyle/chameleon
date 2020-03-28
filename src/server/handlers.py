@@ -43,23 +43,26 @@ class KeycardHandler(StaticFileHandler):
         return current_session
 
     async def get(self, path: str, include_body: bool = True):
-        db_session = DBSession()
-        validated_session = self.validate_session_from_cookie(db_session)
-        if not validated_session:
-            self.set_status(status_code=404)
-            return
-        current_round = db_session.query(Round).join(Game, Game.id == Round.game_id).filter(
-            Game.id == validated_session.game_id
-        ).first()
-        if (
-            current_round.phase == 'set_up'  # TODO: should _really_ be an ordered Enum
-            or current_round.set_up_phase.chameleon_session_id == validated_session.id
-        ):
-            self.set_status(status_code=404)
-            logger.error("Not the right player or time in the game for a keycard.")
-            return
-        logger.debug('%s', path)
-        return super().get(path, include_body=include_body)
+        logger.debug('Getting card at path: %s', path)
+
+        if path == 'keycard.jpeg':
+            db_session = DBSession()
+            validated_session = self.validate_session_from_cookie(db_session)
+            if not validated_session:
+                self.set_status(status_code=404)
+                return
+            current_round = db_session.query(Round).join(Game, Game.id == Round.game_id).filter(
+                Game.id == validated_session.game_id
+            ).first()
+            if (
+                current_round.phase == 'set_up'  # TODO: should _really_ be an ordered Enum
+                or current_round.set_up_phase.chameleon_session_id == validated_session.id
+            ):
+                self.set_status(status_code=404)
+                logger.error("Not the right player or time in the game for a keycard.")
+                return
+
+        return await super().get(path, include_body=include_body)
 
 
 class GameStateHandler(WebSocketHandler):

@@ -11,14 +11,20 @@ from src.server import (
 )
 
 
+CARD_FILE_NAMES = [
+    r"keycard.jpeg",
+    r"chameleon_card.jpeg"
+]
+CARD_PATHS = r"/(" + r"|".join(CARD_FILE_NAMES) + r")"
+
+
 def make_app():
     return tornado.web.Application([
         (r"/websocket", GameStateHandler),
         (r"/api/v1/session", SessionAPIHandler),
         (r"/api/v1/user", UserAPIHandler),
         (r"/api/v1/games", GameAPIHandler),
-        (r"/(assets/public/keycard.jpeg)", KeycardHandler, {'path': "assets/public/keycard.jpeg"}),  # TODO: ENV
-        (r"/(assets/build/keycard.jpeg)", KeycardHandler, {'path': "assets/build/keycard.jpeg"}),
+        (CARD_PATHS, KeycardHandler, {'path': "assets/build/"}),
         (r"/assets/build/(.*)", tornado.web.StaticFileHandler, {'path': "assets/build/"}),
         (r"/(.*)", RootHandler, {'path': "assets/build/"}),  # TODO: ENV
     ], cookie_secret=COOKIE_SECRET)
