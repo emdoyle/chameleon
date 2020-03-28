@@ -39,12 +39,24 @@ export default function TextInput(props) {
                 </TextField>
             </Grid>
             {!Boolean(props.hideButton) && (
+                <React.Fragment>
                 <Grid item>
                     <Button
                         variant='contained'
+                        color='primary'
                         onClick={props.onSubmit}
                     >{props.buttonText || 'Submit'}</Button>
                 </Grid>
+                    {(Boolean(props.altButton) && (
+                        <Grid item>
+                            <Button
+                                variant='contained'
+                                color='secondary'
+                                onClick={props.onAltSubmit}
+                            >{props.altButtonText || 'Alt'}</Button>
+                        </Grid>
+                    ))}
+                </React.Fragment>
             )}
         </Grid>
     );
