@@ -20,6 +20,7 @@ export default function LeaveSessionButton() {
     return (
         <div className={styleClasses.button}>
             <Button
+                variant="contained"
                 onClick={leaveSession}
             >Leave session</Button>
         </div>
