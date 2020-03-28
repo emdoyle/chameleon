@@ -33,6 +33,7 @@ function App() {
   return (
       <Router>
           <div className="App">
+              <div className="App-header">
               <div className={styleClasses.toolbarRoot}>
               <AppBar color='primary' position='static'>
                   <Toolbar>
@@ -43,6 +44,7 @@ function App() {
                       <LeaveSessionButton/>
                   </Toolbar>
               </AppBar>
+              </div>
               </div>
           <div className="App-main">
               <Switch>
