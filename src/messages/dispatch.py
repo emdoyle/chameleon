@@ -8,7 +8,6 @@ from src.messages.handlers import (
 )
 
 if TYPE_CHECKING:
-    from tornado.websocket import WebSocketHandler
     from src.db import (
         DBSession,
         Session
