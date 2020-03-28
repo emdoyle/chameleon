@@ -7,6 +7,7 @@ from src.settings import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, JSON, ForeignKey
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship, sessionmaker
 
 Engine = create_engine(
@@ -65,6 +66,7 @@ class SetUpPhase(Base):
     category = Column(String)
     big_die_roll = Column(Integer)
     small_die_roll = Column(Integer)
+    session_ordering = Column(ARRAY(Integer))
 
 
 class CluePhase(Base):

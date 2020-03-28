@@ -1,6 +1,6 @@
 import random
 import logging
-from typing import Dict, Tuple, Set, TYPE_CHECKING
+from typing import Dict, Tuple, Set, List, TYPE_CHECKING
 from src.db import (
     SetUpPhase,
     Round
@@ -58,11 +58,15 @@ class ReadyMessageHandler(BaseMessageHandler):
         set_up_phase.big_die_roll = dice_rolls[0]
         set_up_phase.small_die_roll = dice_rolls[1]
         set_up_phase.chameleon_session_id = self._pick_chameleon(session_ids)
+        set_up_phase.session_ordering = self._order_sessions(session_ids)
         self.db_session.add(set_up_phase)
         game_round = self.db_session.query(Round).filter(Round.id == set_up_phase.round_id).first()
         game_round.phase = 'clue'
         self.db_session.add(game_round)
         self.db_session.commit()
+
+    def _order_sessions(self, sessions: Set[int]) -> List[int]:
+        return random.sample(sessions, len(sessions))
 
     def _pick_category(self) -> str:
         logger.debug('Category chosen: %s', 'default')

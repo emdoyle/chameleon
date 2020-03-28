@@ -68,7 +68,8 @@ class MessageBuilder:
         return {
             'category': set_up_phase.category,
             'big_die_roll': set_up_phase.big_die_roll,
-            'small_die_roll': set_up_phase.small_die_roll
+            'small_die_roll': set_up_phase.small_die_roll,
+            'session_ordering': set_up_phase.session_ordering,
         }
 
     @classmethod
