@@ -22,7 +22,7 @@ export default function PlayersTable(props) {
                 <TableBody>
                     {players.map(player => (
                         <TableRow key={player.username}>
-                            <TableCell>{player.username}</TableCell>
+                            <TableCell style={{width: '20%'}}>{player.username}</TableCell>
                             <TableCell>{clues[player.id] || '...'}</TableCell>
                         </TableRow>
                     ))}

@@ -2,20 +2,22 @@ import React from 'react';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
 import { makeStyles } from "@material-ui/core/styles";
 import ReadyInput from "./ReadyInput";
 import ClueInput from "./ClueInput";
 import GuessInput from "./GuessInput";
 import VoteInput from "./VoteInput";
 import PlayersTable from "./PlayersTable";
+import CardModal from "./CardModal";
 
 const useStyles = makeStyles(() => ({
     userTable: {
-        minHeight: '75vh',
+        minHeight: '65vh',
         minWidth: '75vw',
     },
     footer: {
-        minHeight: '15vh',
+        minHeight: '25vh',
         minWidth: '100vw',
         backgroundColor: 'white',
         display: 'flex',
@@ -42,6 +44,8 @@ export default function PlayingChameleon() {
     const [phase, setPhase] = React.useState('');
     const [players, setPlayers] = React.useState([]);
     const [clues, setClues] = React.useState({});
+    const [showModalButton, setShowModalButton] = React.useState(true);
+    const [showModal, setShowModal] = React.useState(false);
     React.useEffect(() => {
         axios.get('/api/v1/session').then(response => {
             if (response.data.has_session && response.data.has_game) {
@@ -131,25 +135,39 @@ export default function PlayingChameleon() {
     };
 
     return (
-        <Grid
-            container
-            direction="column"
-            justify="space-between"
-            alignItems="center"
-        >
-            <div className={styleClasses.userTable}>
-                <Grid item>
-                    <PlayersTable
-                        players={players}
-                        clues={clues}
-                    />
-                </Grid>
-            </div>
-            <div className={styleClasses.footer}>
-                <Grid item>
-                    {getPrimaryInput()}
-                </Grid>
-            </div>
-        </Grid>
+        <React.Fragment>
+            <Grid
+                container
+                direction="column"
+                justify="space-between"
+                alignItems="center"
+            >
+                <div className={styleClasses.userTable}>
+                    <Grid item>
+                        <PlayersTable
+                            players={players}
+                            clues={clues}
+                        />
+                    </Grid>
+                </div>
+                <div className={styleClasses.footer}>
+                    <Grid item>
+                        {getPrimaryInput()}
+                    </Grid>
+                    <Grid item style={{paddingTop: '2vh'}}>
+                        {showModalButton && (
+                            <Button
+                                variant="contained"
+                                onClick={() => setShowModal(true)}
+                            >Show Card</Button>
+                        )}
+                    </Grid>
+                </div>
+            </Grid>
+            <CardModal
+                open={showModal}
+                onClose={() => setShowModal(false)}
+            />
+        </React.Fragment>
     )
 }

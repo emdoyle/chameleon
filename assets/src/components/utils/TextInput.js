@@ -30,7 +30,7 @@ export default function TextInput(props) {
                     required
                     disabled={Boolean(props.disabled)}
                     label={props.label || ''}
-                    variant='filled'
+                    variant='outlined'
                     onChange={props.onChange}
                 >
                     <Input
