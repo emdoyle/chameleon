@@ -6,7 +6,6 @@ import TextField from "@material-ui/core/TextField/TextField";
 import Input from "@material-ui/core/Input/Input";
 import Button from "@material-ui/core/Button/Button";
 import {makeStyles} from "@material-ui/core";
-import Typography from '@material-ui/core/Typography';
 import logo from "../../images/logo512.png";
 
 const useStyles = makeStyles(() => ({
@@ -48,9 +47,6 @@ export default function Games() {
             alignItems="center"
             spacing={8}
         >
-            <Grid item>
-                <Typography>Find a game!</Typography>
-            </Grid>
             <Grid item>
                 <img src={logo} className="App-logo" alt="logo" />
             </Grid>

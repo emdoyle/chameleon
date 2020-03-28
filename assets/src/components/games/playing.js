@@ -9,13 +9,17 @@ import PlayersTable from "./PlayersTable";
 
 const useStyles = makeStyles(() => ({
     userTable: {
-        minHeight: '65vh',
+        minHeight: '75vh',
         minWidth: '75vw',
     },
     footer: {
         minHeight: '15vh',
         minWidth: '100vw',
-        backgroundColor: 'white'
+        backgroundColor: 'white',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
     },
 }));
 
@@ -101,7 +105,6 @@ export default function PlayingChameleon() {
             direction="column"
             justify="space-between"
             alignItems="center"
-            spacing={4}
         >
             <div className={styleClasses.userTable}>
                 <Grid item>

@@ -2,7 +2,6 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
 import Input from '@material-ui/core/Input';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -48,9 +47,6 @@ export default function HomePage() {
             alignItems="center"
             spacing={8}
         >
-            <Grid item>
-                <Typography>Make a username!</Typography>
-            </Grid>
             <Grid item>
                 <img src={logo} className="App-logo" alt="logo" />
             </Grid>

@@ -25,7 +25,7 @@ export default function TextInput(props) {
         >
             <Grid item>
                 <TextField
-                    id="clue-text-field"
+                    id={props.id || 'default-text-field'}
                     className={styleClasses.nameInput}
                     required
                     label={props.label || ''}
