@@ -5,6 +5,8 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from "@material-ui/core/styles";
 import ReadyInput from "./ReadyInput";
 import ClueInput from "./ClueInput";
+import GuessInput from "./GuessInput";
+import VoteInput from "./VoteInput";
 import PlayersTable from "./PlayersTable";
 
 const useStyles = makeStyles(() => ({
@@ -33,6 +35,9 @@ export default function PlayingChameleon() {
     const styleClasses = useStyles();
     const [websocket, setWebsocket] = React.useState(null);
     const [yourClue, setYourClue] = React.useState('');
+    const [yourGuess, setYourGuess] = React.useState('');
+    const [yourVote, setYourVote] = React.useState('');
+    const [voteLockedIn, setVoteLockedIn] = React.useState(false);
     const [ready, setReady] = React.useState(false);
     const [phase, setPhase] = React.useState('');
     const [players, setPlayers] = React.useState([]);
@@ -40,7 +45,6 @@ export default function PlayingChameleon() {
     React.useEffect(() => {
         axios.get('/api/v1/session').then(response => {
             if (response.data.has_session && response.data.has_game) {
-                console.log('running effect');
                 const ws = new WebSocket(websocketURL.href);
                 ws.onopen = () => ws.send(JSON.stringify({
                     'kind': 'players'
@@ -69,6 +73,12 @@ export default function PlayingChameleon() {
         }
     };
 
+    const submitYourGuess = () => {
+        if (websocket) {
+            websocket.send(JSON.stringify({'data': 'hello'}))
+        }
+    };
+
     // dictionary or other structured data?
     const getPrimaryInput = () => {
         if (!phase) {
@@ -88,12 +98,33 @@ export default function PlayingChameleon() {
                 />
             )
         }
-        if (phase === 'clues') {
+        if (phase === 'clue') {
+            // pass prop to identify if it is user's turn to give clue
             return (
                 <ClueInput
                     value={yourClue}
                     onChange={(event) => setYourClue(event.target.value)}
                     onSubmit={submitYourClue}
+                />
+            )
+        }
+        if (phase === 'vote') {
+            return (
+                <VoteInput
+                    textValue={yourVote}
+                    onTextChange={(event) => setYourVote(event.target.value)}
+                    checked={voteLockedIn}
+                    onCheckboxChange={(event) => setVoteLockedIn(event.target.checked)}
+                />
+            )
+        }
+        if (phase === 'guess') {
+            // pass prop to identify if user is chameleon
+            return (
+                <GuessInput
+                    value={yourGuess}
+                    onChange={(event) => setYourGuess(event.target.value)}
+                    onSubmit={submitYourGuess}
                 />
             )
         }

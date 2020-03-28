@@ -28,6 +28,7 @@ export default function TextInput(props) {
                     id={props.id || 'default-text-field'}
                     className={styleClasses.nameInput}
                     required
+                    disabled={Boolean(props.disabled)}
                     label={props.label || ''}
                     variant='filled'
                     onChange={props.onChange}
@@ -37,12 +38,14 @@ export default function TextInput(props) {
                     />
                 </TextField>
             </Grid>
-            <Grid item>
-                <Button
-                    variant='contained'
-                    onClick={props.onSubmit}
-                >{props.buttonText || 'Submit'}</Button>
-            </Grid>
+            {!Boolean(props.hideButton) && (
+                <Grid item>
+                    <Button
+                        variant='contained'
+                        onClick={props.onSubmit}
+                    >{props.buttonText || 'Submit'}</Button>
+                </Grid>
+            )}
         </Grid>
     );
 }
