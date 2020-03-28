@@ -4,7 +4,8 @@ __all__ = [
     'UserAPIHandler',
     'GameAPIHandler',
     'RootHandler',
-    'KeycardHandler'
+    'KeycardHandler',
+    'PublicAssetHandler'
 ]
 
 from .handlers import (
@@ -13,5 +14,6 @@ from .handlers import (
     UserAPIHandler,
     GameAPIHandler,
     RootHandler,
-    KeycardHandler
+    KeycardHandler,
+    PublicAssetHandler
 )

@@ -56,7 +56,7 @@ export default function PlayingChameleon() {
     const [showModalButton, setShowModalButton] = React.useState(true);
     const [showModal, setShowModal] = React.useState(false);
     const [cardImagePath, setCardImagePath] = React.useState('keycard.jpeg');  // remove later
-    const [showCategoryCard, setShowCategoryCard] = React.useState(false);
+    const [showCategoryCard, setShowCategoryCard] = React.useState(true);
     const [categoryImagePath, setCategoryImagePath] = React.useState('category.jpeg');  // remove later
     React.useEffect(() => {
         axios.get('/api/v1/session').then(response => {

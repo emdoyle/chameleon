@@ -14,6 +14,7 @@ from src.messages.data import OutgoingMessages
 from src.messages.builder import MessageBuilder
 from src.messages.dispatch import MessageDispatch
 from src.settings import CORS_ORIGINS
+from src.constants import CARD_FILE_NAMES
 
 logger = logging.getLogger('chameleon')  # TODO: ENV
 logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -23,6 +24,15 @@ logger.setLevel(logging.DEBUG)
 class RootHandler(StaticFileHandler):
     def parse_url_path(self, url_path: str):
         return 'index.html'
+
+
+class PublicAssetHandler(StaticFileHandler):
+    async def get(self, path: str, include_body: bool = True):
+        if path in CARD_FILE_NAMES:
+            logger.error("Cannot serve protected file: %s from PublicAssetHandler", path)
+            self.set_status(status_code=404)
+            return
+        return await super().get(path, include_body=include_body)
 
 
 class KeycardHandler(StaticFileHandler):

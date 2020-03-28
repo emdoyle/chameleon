@@ -7,15 +7,12 @@ from src.server import (
     UserAPIHandler,
     GameAPIHandler,
     RootHandler,
-    KeycardHandler
+    KeycardHandler,
+    PublicAssetHandler,
 )
-
-
-CARD_FILE_NAMES = [
-    r"keycard.jpeg",
-    r"chameleon_card.jpeg"
-]
-CARD_PATHS = r"/(" + r"|".join(CARD_FILE_NAMES) + r")"
+from src.constants import (
+    CARD_PATHS,
+)
 
 
 def make_app():
@@ -25,7 +22,7 @@ def make_app():
         (r"/api/v1/user", UserAPIHandler),
         (r"/api/v1/games", GameAPIHandler),
         (CARD_PATHS, KeycardHandler, {'path': "assets/build/"}),
-        (r"/assets/build/(.*)", tornado.web.StaticFileHandler, {'path': "assets/build/"}),
+        (r"/assets/build/(.*)", PublicAssetHandler, {'path': "assets/build/"}),
         (r"/(.*)", RootHandler, {'path': "assets/build/"}),  # TODO: ENV
     ], cookie_secret=COOKIE_SECRET)
 
