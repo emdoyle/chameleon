@@ -133,6 +133,6 @@ class BaseMessageHandler(AbstractMessageHandler):
                 message_to_send = full_game_state_message.add_chameleon()
             if clue_turn_session_id is not None and session_in_game.id == clue_turn_session_id:
                 logger.debug("Showing session %s that it is their turn to give a clue!", session_in_game.id)
-                message_to_send.add_is_clue_turn()
+                message_to_send = message_to_send.add_is_clue_turn()
             messages[session_in_game.id] = [message_to_send]
         return OutgoingMessages(messages=messages)
