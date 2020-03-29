@@ -24,7 +24,7 @@ class VoteMessageHandler(BaseMessageHandler):
         counted_votes = Counter(votes.values())
         logger.debug("Counted votes: %s", counted_votes)
         if (
-            {str(key) for key in votes.keys()} == {str(key) for key in self.connected_sessions.keys()}
+            {str(key) for key in votes.keys()} == {str(key) for key in self.connected_sessions.keys()}  # TODO: IN_GAME only
             and len(counted_votes) <= 2
             and any(count <= 1 for count in counted_votes.values())
         ):

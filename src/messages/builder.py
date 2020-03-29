@@ -100,7 +100,7 @@ class MessageBuilder:
         result = {'players': []}
         for player in players:
             session_id = player.session.id
-            if session_id not in self.connected_sessions:
+            if session_id not in self.connected_sessions:  # TODO: IN_GAME only
                 logger.error("Session %s has disconnected from the game!", player.id)
                 continue
             entry = {

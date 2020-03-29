@@ -15,7 +15,7 @@ export default function LeaveSessionButton() {
     const history = useHistory();
     const styleClasses = useStyles();
     const leaveSession = () => {
-        axios.post('/api/v1/session').then(() => history.push('/')).catch(error => console.log(error))
+        axios.delete('/api/v1/session').then(() => history.push('/')).catch(error => console.log(error))
     };
     return (
         <div className={styleClasses.button}>
