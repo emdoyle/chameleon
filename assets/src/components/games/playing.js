@@ -120,7 +120,10 @@ export default function PlayingChameleon() {
     }, []);
     const submitYourClue = () => {
         if (websocket) {
-            websocket.send(JSON.stringify({'data': 'hello'}))
+            websocket.send(JSON.stringify({
+                'kind': 'clue',
+                'clue': yourClue,
+            }))
         }
     };
 
@@ -153,6 +156,7 @@ export default function PlayingChameleon() {
             // pass prop to identify if it is user's turn to give clue
             return (
                 <ClueInput
+                    hidden={!Boolean(isYourClueTurn)}
                     value={yourClue}
                     onChange={(event) => setYourClue(event.target.value)}
                     onSubmit={submitYourClue}

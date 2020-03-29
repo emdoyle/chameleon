@@ -78,7 +78,7 @@ class BaseMessageHandler(AbstractMessageHandler):
 
     def _get_clue_phase(self, game_id: int) -> Optional['CluePhase']:
         return self.db_session.query(CluePhase).join(
-            Round, Round.id == SetUpPhase.round_id
+            Round, Round.id == CluePhase.round_id
         ).join(
             Game, Game.id == Round.game_id
         ).filter(
@@ -111,7 +111,7 @@ class BaseMessageHandler(AbstractMessageHandler):
         return next((
             session_id
             for session_id in session_ordering
-            if session_id not in clue_phase.clues and session_id in self.connected_sessions
+            if str(session_id) not in clue_phase.clues and session_id in self.connected_sessions
         ), None)
 
     def _default_messages(self, game_id: int, session_id: int, filter_self: bool = True) -> 'OutgoingMessages':

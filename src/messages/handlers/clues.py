@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, TYPE_CHECKING
 from .base import BaseMessageHandler
 
@@ -7,15 +8,27 @@ if TYPE_CHECKING:
     )
     from ..data import OutgoingMessages
 
+logger = logging.getLogger('chameleon')
+
 
 class ClueMessageHandler(BaseMessageHandler):
+    def _update_clues(self, session: 'Session', clue: str) -> None:
+        clue_phase = self._get_clue_phase(session.game_id)
+        clue_phase.clues = {**clue_phase.clues, session.id: clue}
+        self.db_session.add(clue_phase)
+        self.db_session.commit()
+
     def handle(self, message: Dict, session: 'Session') -> 'OutgoingMessages':
         if message['kind'] != 'clue':
             raise ValueError("ClueMessageHandler expects messages of kind 'clue'")
 
-        # need to validate that this is coming from the right session
-        # 1. retrieve session id which should currently be submitting a clue
-        # 2. compare to this session id
-        # 3. if match: update the DB with this clue and send default message
-        # 4. if no match: log error and return no messages
-        ...
+        clue_turn_session_id = self._get_clue_turn_session_id(game_id=session.game_id)
+        if not session.id == clue_turn_session_id:
+            logger.error("Received clue message from session %s but clue turn is %s", session.id, clue_turn_session_id)
+            return OutgoingMessages()
+        try:
+            clue = message['clue']
+        except KeyError:
+            raise ValueError("Clue message must contain 'clue' key")
+        self._update_clues(session, clue)
+        return self._default_messages(game_id=session.game_id, session_id=session.id, filter_self=False)
