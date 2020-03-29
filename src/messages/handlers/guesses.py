@@ -1,5 +1,9 @@
 import logging
 from typing import Dict, TYPE_CHECKING
+from src.categories import (
+    CATEGORIES,
+    KEYCARD
+)
 from .base import BaseMessageHandler
 
 if TYPE_CHECKING:
@@ -16,7 +20,16 @@ class GuessMessageHandler(BaseMessageHandler):
         return session.id == self._get_chameleon_session_id(session.game_id)
 
     def _check_guess(self, session: 'Session', guess: str) -> bool:
-        ...
+        set_up_phase = self._get_set_up_phase(session.game_id)
+        try:
+            category = CATEGORIES[set_up_phase.category]
+        except KeyError:
+            logger.error("Cannot find category for %s", set_up_phase.category)
+            return False
+        decoded = KEYCARD[str(set_up_phase.big_die_roll)][set_up_phase.small_die_roll - 1]
+        correct_answer = category[decoded[0]][decoded[1] - 1].lower()
+        logger.debug("Decoded big die: %s small die: %s to:\n%s", decoded[0], decoded[1], correct_answer)
+        return correct_answer == guess.lower()
 
     def _update_game_state(self, session: 'Session', guess: str, guess_is_correct: bool) -> None:
         current_round = self._get_round(session.game_id)
