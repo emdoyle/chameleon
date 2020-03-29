@@ -89,6 +89,7 @@ export default function PlayingChameleon() {
     const [yourClue, setYourClue] = React.useState('');
     const [isYourClueTurn, setIsYourClueTurn] = React.useState(false);
     const [yourGuess, setYourGuess] = React.useState('');
+    const [chameleon, setChameleon] = React.useState(false);
     const [chameleonGuess, setChameleonGuess] = React.useState('');
     const [smallDieRoll, setSmallDieRoll] = React.useState(null);
     const [bigDieRoll, setBigDieRoll] = React.useState(null);
@@ -138,6 +139,7 @@ export default function PlayingChameleon() {
         } else {
             setCardImagePath('keycard.jpeg')
         }
+        setChameleon(message.chameleon);
     };
 
     React.useEffect(() => {
@@ -145,7 +147,7 @@ export default function PlayingChameleon() {
             if (response.data.has_session && response.data.has_game) {
                 const ws = new WebSocket(websocketURL.href);
                 ws.onopen = () => ws.send(JSON.stringify({
-                    'kind': 'players'
+                    kind: 'players'
                 }));
                 ws.onmessage = event => handleGameStateMessage(JSON.parse(event.data));
                 ws.onclose = () => console.log("Figure out how to reconnect");
@@ -164,15 +166,18 @@ export default function PlayingChameleon() {
     const submitYourClue = () => {
         if (websocket) {
             websocket.send(JSON.stringify({
-                'kind': 'clue',
-                'clue': yourClue,
+                kind: 'clue',
+                clue: yourClue,
             }))
         }
     };
 
     const submitYourGuess = () => {
         if (websocket) {
-            websocket.send(JSON.stringify({'data': 'hello'}))
+            websocket.send(JSON.stringify({
+                kind: 'guess',
+                guess: yourGuess,
+            }))
         }
     };
 
@@ -202,8 +207,8 @@ export default function PlayingChameleon() {
                     onChange={(event) => {
                         setReady(event.target.checked);
                         websocket.send(JSON.stringify({
-                            'kind': 'ready',
-                            'ready': event.target.checked
+                            kind: 'ready',
+                            ready: event.target.checked
                         }))
                     }}
                 />
@@ -233,9 +238,9 @@ export default function PlayingChameleon() {
             )
         }
         if (phase === 'reveal') {
-            // pass prop to identify if user is chameleon
             return (
                 <GuessInput
+                    hidden={!Boolean(chameleon)}
                     value={yourGuess}
                     onChange={(event) => setYourGuess(event.target.value)}
                     onSubmit={submitYourGuess}

@@ -85,10 +85,11 @@ class MessageBuilder:
                 'id': current_round.id,
                 'phase': current_round.phase,
                 'completed': current_round.completed,
+                'winner': current_round.winner,
                 'set_up': cls._build_set_up_dict(current_round.set_up_phase),
                 'clue': cls._build_clue_dict(current_round.clue_phase),
                 'vote': cls._build_vote_dict(current_round.vote_phase),
-                'reveal': cls._build_reveal_dict(current_round.reveal_phase)
+                'reveal': cls._build_reveal_dict(current_round.reveal_phase),
             }
         }
 
