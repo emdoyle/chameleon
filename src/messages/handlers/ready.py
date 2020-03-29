@@ -5,6 +5,9 @@ from src.db import (
     SetUpPhase,
     Round
 )
+from src.categories import (
+    CATEGORIES
+)
 from .base import BaseMessageHandler
 from ..data import OutgoingMessages
 
@@ -69,8 +72,9 @@ class ReadyMessageHandler(BaseMessageHandler):
         return random.sample(sessions, len(sessions))
 
     def _pick_category(self) -> str:
-        logger.debug('Category chosen: %s', 'default')
-        return 'default'
+        category_choice = random.sample(CATEGORIES.keys(), 1)[0]
+        logger.debug('Category chosen: %s', category_choice)
+        return category_choice
 
     def _pick_dice_rolls(self) -> Tuple[int, int]:
         big = random.randint(1, 6)
