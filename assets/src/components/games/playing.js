@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import Paper from '@material-ui/core/Paper';
 import { makeStyles } from "@material-ui/core/styles";
 import ReadyInput from "./ReadyInput";
 import ClueInput from "./ClueInput";
@@ -29,6 +30,9 @@ const useStyles = makeStyles(() => ({
         justifyContent: 'center',
         alignItems: 'center'
     },
+    footerRow: {
+        minWidth: '100vw',
+    },
     userTable: {
         minHeight: '100%',
         minWidth: '40%'
@@ -36,6 +40,40 @@ const useStyles = makeStyles(() => ({
     categoryCard: {
         minHeight: '100%',
         maxWidth: '45%'
+    },
+    leftDieContainer: {
+        minWidth: '15vw',
+        paddingLeft: '2vw',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    rightDieContainer: {
+        minWidth: '15vw',
+        paddingRight: '2vw',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    leftDie: {
+        width: '100px',
+        height: '100px',
+        backgroundColor: '#4eb5de',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    rightDie: {
+        width: '150px',
+        height: '150px',
+        backgroundColor: '#e3d452',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
     }
 }));
 
@@ -244,15 +282,55 @@ export default function PlayingChameleon() {
                 </div>
                 <div className={styleClasses.footer}>
                     <Grid item>
-                        {getPrimaryInput()}
-                    </Grid>
-                    <Grid item style={{paddingTop: '2vh'}}>
-                        {showModalButton && (
-                            <Button
-                                variant="contained"
-                                onClick={() => setShowModal(true)}
-                            >Show Card</Button>
-                        )}
+                        <div className={styleClasses.footerRow}>
+                        <Grid
+                            container
+                            direction="row"
+                            justify="space-between"
+                            alignItems="center"
+                        >
+                            <div className={styleClasses.leftDieContainer}>
+                                <Grid item>
+                                    {Boolean(smallDieRoll) && (
+                                        <Paper
+                                            variant="outlined"
+                                            className={styleClasses.leftDie}
+                                        >{smallDieRoll}</Paper>
+                                    )}
+                                </Grid>
+                            </div>
+                            <Grid item>
+                                <Grid
+                                    container
+                                    direction="column"
+                                    justify="center"
+                                    alignItems="center"
+                                >
+                                    <Grid item>
+                                        {getPrimaryInput()}
+                                    </Grid>
+                                    <Grid item style={{paddingTop: '2vh'}}>
+                                        {showModalButton && (
+                                            <Button
+                                                variant="contained"
+                                                onClick={() => setShowModal(true)}
+                                            >Show Card</Button>
+                                        )}
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                            <div className={styleClasses.rightDieContainer}>
+                                <Grid item>
+                                    {Boolean(bigDieRoll) && (
+                                        <Paper
+                                            variant="outlined"
+                                            className={styleClasses.rightDie}
+                                        >{bigDieRoll}</Paper>
+                                    )}
+                                </Grid>
+                            </div>
+                        </Grid>
+                        </div>
                     </Grid>
                 </div>
             </Grid>
