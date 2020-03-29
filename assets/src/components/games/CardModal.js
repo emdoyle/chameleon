@@ -13,6 +13,14 @@ const useStyles = makeStyles(theme => ({
         boxShadow: theme.shadows[5],
         padding: theme.spacing(2, 4, 3),
     },
+    modalImgContainer: {
+        width: '60vw',
+        minHeight: '10vh',
+    },
+    modalImg: {
+        width: '100%',
+        height: '100%',
+    }
 }));
 
 
@@ -33,7 +41,14 @@ export default function CardModal(props) {
         >
             <div className={styleClasses.modal}>
                 {!Boolean(imageFailed) && (
-                    <img alt="Could not load" onError={handleImageLoadError} src={props.imgSrc} />
+                    <div className={styleClasses.modalImgContainer}>
+                        <img
+                            className={styleClasses.modalImg}
+                            alt="Could not load"
+                            onError={handleImageLoadError}
+                            src={props.imgSrc}
+                        />
+                    </div>
                 )}
             </div>
         </Modal>
