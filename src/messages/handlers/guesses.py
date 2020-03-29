@@ -36,7 +36,7 @@ class GuessMessageHandler(BaseMessageHandler):
         reveal_phase = current_round.reveal_phase
         reveal_phase.guess = guess
         if guess_is_correct:
-            current_round.winner = "Chameleon"
+            current_round.winner = "The Chameleon"
         else:
             current_round.winner = "The People"
         self.db_session.add(current_round)

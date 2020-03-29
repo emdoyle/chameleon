@@ -12,6 +12,7 @@ import VoteInput from "./VoteInput";
 import PlayersTable from "./PlayersTable";
 import CardModal from "./CardModal";
 import CategoryCard from "./CategoryCard";
+import WinnerModal from "./WinnerModal";
 import {
     CATEGORY_IMAGE_PATHS
 } from "../utils/constants";
@@ -91,6 +92,7 @@ export default function PlayingChameleon() {
     const [yourGuess, setYourGuess] = React.useState('');
     const [chameleon, setChameleon] = React.useState(false);
     const [chameleonGuess, setChameleonGuess] = React.useState('');
+    const [winner, setWinner] = React.useState('');
     const [smallDieRoll, setSmallDieRoll] = React.useState(null);
     const [bigDieRoll, setBigDieRoll] = React.useState(null);
     const [yourVote, setYourVote] = React.useState('');
@@ -103,6 +105,7 @@ export default function PlayingChameleon() {
     const [votes, setVotes] = React.useState({});
     const [showModalButton, setShowModalButton] = React.useState(false);
     const [showModal, setShowModal] = React.useState(false);
+    const [showWinnerModal, setShowWinnerModal] = React.useState(false);
     const [cardImagePath, setCardImagePath] = React.useState('');
     const [showCategoryCard, setShowCategoryCard] = React.useState(false);
     const [categoryImagePath, setCategoryImagePath] = React.useState('');
@@ -120,6 +123,7 @@ export default function PlayingChameleon() {
             clue: newClue = {},
             vote: newVote = {},
             reveal: newReveal = {},
+            winner: newWinner = '',
         } = message.round;
         setPhase(newPhase);
         // TODO: handle completed state
@@ -140,6 +144,9 @@ export default function PlayingChameleon() {
             setCardImagePath('keycard.jpeg')
         }
         setChameleon(message.chameleon);
+        setChameleonGuess(newReveal.guess || '');
+        setWinner(newWinner);
+        setShowWinnerModal(Boolean(newWinner));
     };
 
     React.useEffect(() => {
@@ -240,7 +247,7 @@ export default function PlayingChameleon() {
         if (phase === 'reveal') {
             return (
                 <GuessInput
-                    hidden={!Boolean(chameleon)}
+                    hidden={!Boolean(chameleon) || Boolean(winner)}
                     value={yourGuess}
                     onChange={(event) => setYourGuess(event.target.value)}
                     onSubmit={submitYourGuess}
@@ -343,6 +350,11 @@ export default function PlayingChameleon() {
                 open={showModal}
                 imgSrc={cardImagePath}
                 onClose={() => setShowModal(false)}
+            />
+            <WinnerModal
+                open={showWinnerModal}
+                value={winner}
+                onClose={() => setShowWinnerModal(false)}
             />
         </React.Fragment>
     )
