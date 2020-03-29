@@ -20,7 +20,7 @@ const useStyles = makeStyles(theme => ({
         padding: theme.spacing(2, 4, 3),
     },
     modalContent: {
-        width: '80%',
+        width: '95%',
         height: '60%',
         display: 'flex',
         direction: 'column',

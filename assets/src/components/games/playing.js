@@ -42,7 +42,7 @@ const useStyles = makeStyles(() => ({
         minHeight: '100%',
         maxWidth: '45%'
     },
-    leftDieContainer: {
+    rightDieContainer: {
         minWidth: '15vw',
         paddingLeft: '2vw',
         display: 'flex',
@@ -50,7 +50,7 @@ const useStyles = makeStyles(() => ({
         justifyContent: 'center',
         alignItems: 'center'
     },
-    rightDieContainer: {
+    leftDieContainer: {
         minWidth: '15vw',
         paddingRight: '2vw',
         display: 'flex',
@@ -58,7 +58,7 @@ const useStyles = makeStyles(() => ({
         justifyContent: 'center',
         alignItems: 'center'
     },
-    leftDie: {
+    rightDie: {
         width: '100px',
         height: '100px',
         backgroundColor: '#4eb5de',
@@ -67,7 +67,7 @@ const useStyles = makeStyles(() => ({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    rightDie: {
+    leftDie: {
         width: '150px',
         height: '150px',
         backgroundColor: '#e3d452',
@@ -303,11 +303,11 @@ export default function PlayingChameleon() {
                         >
                             <div className={styleClasses.leftDieContainer}>
                                 <Grid item>
-                                    {Boolean(smallDieRoll) && (
+                                    {Boolean(bigDieRoll) && (
                                         <Paper
                                             variant="outlined"
                                             className={styleClasses.leftDie}
-                                        >{smallDieRoll}</Paper>
+                                        >{bigDieRoll}</Paper>
                                     )}
                                 </Grid>
                             </div>
@@ -333,11 +333,11 @@ export default function PlayingChameleon() {
                             </Grid>
                             <div className={styleClasses.rightDieContainer}>
                                 <Grid item>
-                                    {Boolean(bigDieRoll) && (
+                                    {Boolean(smallDieRoll) && (
                                         <Paper
                                             variant="outlined"
                                             className={styleClasses.rightDie}
-                                        >{bigDieRoll}</Paper>
+                                        >{smallDieRoll}</Paper>
                                     )}
                                 </Grid>
                             </div>

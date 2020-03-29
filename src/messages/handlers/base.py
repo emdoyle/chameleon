@@ -58,6 +58,14 @@ class BaseMessageHandler(AbstractMessageHandler):
     ):
         return cls(db_session=db_session, ready_states=ready_states, connected_sessions=connected_sessions)
 
+    def _get_username_for_session_id(self, session_id: int) -> str:
+        user = self.db_session.query(User).join(Session, Session.user_id == User.id).filter(
+            Session.id == session_id
+        ).first()
+        if user is None:
+            logger.error("Cannot get username for session %s", session_id)
+        return user.username
+
     def _get_round(self, game_id: int) -> Optional['Round']:
         return self.db_session.query(Round).filter(
             Round.completed == false()
