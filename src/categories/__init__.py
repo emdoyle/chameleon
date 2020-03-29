@@ -1,9 +1,19 @@
 from .data import (
-    ARTS
+    ARTS,
+    GAMES,
+    HOBBIES,
+    MOVIES,
+    MUSIC,
+    TRANSPORT
 )
 
 CATEGORIES = {
     'arts': ARTS,
+    'games': GAMES,
+    'hobbies': HOBBIES,
+    'movies': MOVIES,
+    'music': MUSIC,
+    'transport': TRANSPORT
 }
 
 KEYCARD = {
