@@ -74,7 +74,7 @@ class CluePhase(Base):
 
     id = Column(Integer, primary_key=True)
     round_id = Column(Integer, ForeignKey('rounds.id'))
-    clues = Column(JSON)
+    clues = Column(JSON, default=dict)
 
 
 class VotePhase(Base):

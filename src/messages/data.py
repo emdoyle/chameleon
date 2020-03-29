@@ -15,6 +15,11 @@ class OutgoingMessage:
         data['chameleon'] = True
         return OutgoingMessage(data=data)
 
+    def add_is_clue_turn(self) -> 'OutgoingMessage':
+        data = deepcopy(self.data)
+        data['is_clue_turn'] = True
+        return OutgoingMessage(data=data)
+
 
 @attr.s(slots=True)
 class OutgoingMessages:

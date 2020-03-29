@@ -49,6 +49,7 @@ export default function PlayingChameleon() {
     const styleClasses = useStyles();
     const [websocket, setWebsocket] = React.useState(null);
     const [yourClue, setYourClue] = React.useState('');
+    const [isYourClueTurn, setIsYourClueTurn] = React.useState(false);
     const [yourGuess, setYourGuess] = React.useState('');
     const [chameleonGuess, setChameleonGuess] = React.useState('');
     const [smallDieRoll, setSmallDieRoll] = React.useState(null);
@@ -70,7 +71,7 @@ export default function PlayingChameleon() {
     const handleGameStateMessage = (message) => {
         setPlayers(message.players || []);
         const {
-            newPhase = '',
+            phase: newPhase = '',
             set_up: newSetUp = {},
             clue: newClue = {},
             vote: newVote = {},
@@ -88,6 +89,7 @@ export default function PlayingChameleon() {
         setCategoryImagePath(CATEGORY_IMAGE_PATHS[newSetUp.category || 'default']);
         setShowModalButton(newPhase !== 'set_up');
         setShowCategoryCard(newPhase !== 'set_up');
+        setIsYourClueTurn(message.is_clue_turn);
         if (Boolean(message.chameleon)) {
             setCardImagePath('chameleon_card.jpeg')
         } else {

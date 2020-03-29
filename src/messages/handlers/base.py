@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Iterable, Optional, TYPE_CHECKING
 from sqlalchemy.sql.expression import false
 from src.db import (
-    Session, Game, Round, SetUpPhase
+    Session, Game, Round, SetUpPhase, CluePhase
 )
 from src.messages.builder import MessageBuilder
 from ..data import OutgoingMessages
@@ -42,6 +42,7 @@ class BaseMessageHandler(AbstractMessageHandler):
     ):
         self.db_session = db_session
         self.ready_states = ready_states
+        self.connected_sessions = connected_sessions
         self.message_builder = MessageBuilder.factory(
             db_session=db_session,
             ready_states=ready_states,
@@ -57,11 +58,15 @@ class BaseMessageHandler(AbstractMessageHandler):
     ):
         return cls(db_session=db_session, ready_states=ready_states, connected_sessions=connected_sessions)
 
-    def _get_sessions_in_game(self, game_id: int) -> Iterable['Session']:
-        return self.db_session.query(Session).filter(Session.game_id == game_id).all()
+    def _get_round(self, game_id: int) -> Optional['Round']:
+        return self.db_session.query(Round).filter(
+            Round.completed == false()
+        ).filter(
+            Round.game_id == game_id
+        ).first()
 
-    def _get_chameleon_session_id(self, game_id: int) -> Optional[int]:
-        set_up_phase = self.db_session.query(SetUpPhase).join(
+    def _get_set_up_phase(self, game_id: int) -> Optional['SetUpPhase']:
+        return self.db_session.query(SetUpPhase).join(
             Round, Round.id == SetUpPhase.round_id
         ).join(
             Game, Game.id == Round.game_id
@@ -70,14 +75,49 @@ class BaseMessageHandler(AbstractMessageHandler):
         ).filter(
             Game.id == game_id
         ).first()
+
+    def _get_clue_phase(self, game_id: int) -> Optional['CluePhase']:
+        return self.db_session.query(CluePhase).join(
+            Round, Round.id == SetUpPhase.round_id
+        ).join(
+            Game, Game.id == Round.game_id
+        ).filter(
+            Round.completed == false()
+        ).filter(
+            Game.id == game_id
+        ).first()
+
+    def _get_sessions_in_game(self, game_id: int) -> Iterable['Session']:
+        return self.db_session.query(Session).filter(Session.game_id == game_id).all()
+
+    def _get_chameleon_session_id(self, game_id: int) -> Optional[int]:
+        set_up_phase = self._get_set_up_phase(game_id=game_id)
         if set_up_phase is None:
             logger.debug("Tried to get chameleon session id but none found with game id: %s", game_id)
             return None
         return set_up_phase.chameleon_session_id
 
+    def _get_clue_turn_session_id(self, game_id: int) -> Optional[int]:
+        current_round = self._get_round(game_id=game_id)
+        if current_round.phase != 'clue':
+            logger.debug("Nobody's turn to give clues right now")
+            return None
+        set_up_phase = current_round.set_up_phase
+        clue_phase = current_round.clue_phase
+        if set_up_phase is None:
+            logger.debug("Tried to get clue turn session id but none found with game id: %s", game_id)
+            return None
+        session_ordering = set_up_phase.session_ordering
+        return next((
+            session_id
+            for session_id in session_ordering
+            if session_id not in clue_phase.clues and session_id in self.connected_sessions
+        ), None)
+
     def _default_messages(self, game_id: int, session_id: int, filter_self: bool = True) -> 'OutgoingMessages':
         sessions_in_game = self._get_sessions_in_game(game_id)
         chameleon_session_id = self._get_chameleon_session_id(game_id)
+        clue_turn_session_id = self._get_clue_turn_session_id(game_id)
         full_game_state_message = self.message_builder.create_full_game_state_message(
             game_id=game_id
         )  # inefficient
@@ -86,9 +126,13 @@ class BaseMessageHandler(AbstractMessageHandler):
         for session_in_game in sessions_in_game:
             if filter_self and session_in_game.id == session_id:
                 continue
+
+            message_to_send = full_game_state_message
             if chameleon_session_id is not None and session_in_game.id == chameleon_session_id:
                 logger.debug("Showing session %s that they are the chameleon!", session_in_game.id)
-                messages[session_in_game.id] = [full_game_state_message.add_chameleon()]
-            else:
-                messages[session_in_game.id] = [full_game_state_message]
+                message_to_send = full_game_state_message.add_chameleon()
+            if clue_turn_session_id is not None and session_in_game.id == clue_turn_session_id:
+                logger.debug("Showing session %s that it is their turn to give a clue!", session_in_game.id)
+                message_to_send.add_is_clue_turn()
+            messages[session_in_game.id] = [message_to_send]
         return OutgoingMessages(messages=messages)
