@@ -12,10 +12,21 @@ logger = logging.getLogger('chameleon')
 
 
 class ClueMessageHandler(BaseMessageHandler):
-    def _update_clues(self, session: 'Session', clue: str) -> None:
+    @classmethod
+    def _validate_clue(cls, clue: str) -> bool:
+        return ' ' not in clue
+
+    def _update_game_state(self, session: 'Session', clue: str) -> None:
         clue_phase = self._get_clue_phase(session.game_id)
         clue_phase.clues = {**clue_phase.clues, session.id: clue}
         self.db_session.add(clue_phase)
+
+        if clue_phase.clues.keys() == self.connected_sessions.keys():
+            logger.debug("Everybody in game: %s has given a clue, moving to voting phase!", session.game_id)
+            current_round = self._get_round(session.game_id)
+            current_round.phase = 'vote'
+            self.db_session.add(current_round)
+
         self.db_session.commit()
 
     def handle(self, message: Dict, session: 'Session') -> 'OutgoingMessages':
@@ -30,5 +41,6 @@ class ClueMessageHandler(BaseMessageHandler):
             clue = message['clue']
         except KeyError:
             raise ValueError("Clue message must contain 'clue' key")
-        self._update_clues(session, clue)
+        if self._validate_clue(clue):
+            self._update_game_state(session, clue)
         return self._default_messages(game_id=session.game_id, session_id=session.id, filter_self=False)

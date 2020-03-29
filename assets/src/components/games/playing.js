@@ -138,7 +138,7 @@ export default function PlayingChameleon() {
         if (!phase) {
             return <React.Fragment />
         }
-        if (phase === 'set_up') {
+        if (phase === 'set_up') { // makes testing very hard to check for one player
             return (
                 <ReadyInput
                     value={ready}
@@ -166,6 +166,7 @@ export default function PlayingChameleon() {
         if (phase === 'vote') {
             return (
                 <VoteInput
+                    label="Who is the chameleon?"
                     textValue={yourVote}
                     onTextChange={(event) => setYourVote(event.target.value)}
                     checked={voteLockedIn}

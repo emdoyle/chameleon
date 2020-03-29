@@ -26,6 +26,7 @@ export default function CheckboxInput(props) {
                 <FormControl component="fieldset">
                     <FormControlLabel
                         control={<Checkbox
+                            disabled={Boolean(props.disabled)}
                             checked={props.value}
                             onChange={props.onChange}
                             name={props.name || 'default-checkbox-input'}

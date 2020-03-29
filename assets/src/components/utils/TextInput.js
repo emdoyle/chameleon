@@ -27,7 +27,6 @@ export default function TextInput(props) {
                 <TextField
                     id={props.id || 'default-text-field'}
                     className={styleClasses.nameInput}
-                    required
                     disabled={Boolean(props.disabled)}
                     label={props.label || ''}
                     variant='outlined'

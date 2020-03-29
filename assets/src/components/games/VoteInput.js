@@ -15,6 +15,7 @@ export default function VoteInput(props) {
         >
             <Grid item>
                 <TextInput
+                    label={props.label}
                     value={props.textValue}
                     onChange={props.onTextChange}
                     disabled={Boolean(props.checked)}
@@ -23,6 +24,7 @@ export default function VoteInput(props) {
             </Grid>
             <Grid item>
                 <CheckboxInput
+                    disabled={!Boolean(props.textValue)}
                     value={Boolean(props.checked)}
                     onChange={props.onCheckboxChange}
                     label="Confirm"
