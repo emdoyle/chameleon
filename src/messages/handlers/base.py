@@ -87,7 +87,8 @@ class BaseMessageHandler(AbstractMessageHandler):
             if filter_self and session_in_game.id == session_id:
                 continue
             if chameleon_session_id is not None and session_in_game.id == chameleon_session_id:
-                messages[session_in_game.id] = [full_game_state_message.augment(chameleon_session_id)]
+                logger.debug("Showing session %s that they are the chameleon!", session_in_game.id)
+                messages[session_in_game.id] = [full_game_state_message.add_chameleon()]
             else:
                 messages[session_in_game.id] = [full_game_state_message]
         return OutgoingMessages(messages=messages)

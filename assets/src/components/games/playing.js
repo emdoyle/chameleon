@@ -11,6 +11,9 @@ import VoteInput from "./VoteInput";
 import PlayersTable from "./PlayersTable";
 import CardModal from "./CardModal";
 import CategoryCard from "./CategoryCard";
+import {
+    CATEGORY_IMAGE_PATHS
+} from "../utils/constants";
 
 const useStyles = makeStyles(() => ({
     mainContent: {
@@ -47,17 +50,51 @@ export default function PlayingChameleon() {
     const [websocket, setWebsocket] = React.useState(null);
     const [yourClue, setYourClue] = React.useState('');
     const [yourGuess, setYourGuess] = React.useState('');
+    const [chameleonGuess, setChameleonGuess] = React.useState('');
+    const [smallDieRoll, setSmallDieRoll] = React.useState(null);
+    const [bigDieRoll, setBigDieRoll] = React.useState(null);
     const [yourVote, setYourVote] = React.useState('');
     const [voteLockedIn, setVoteLockedIn] = React.useState(false);
     const [ready, setReady] = React.useState(false);
     const [phase, setPhase] = React.useState('');
     const [players, setPlayers] = React.useState([]);
     const [clues, setClues] = React.useState({});
-    const [showModalButton, setShowModalButton] = React.useState(true);
+    const [clueSessionOrder, setClueSessionOrder] = React.useState([]);
+    const [votes, setVotes] = React.useState({});
+    const [showModalButton, setShowModalButton] = React.useState(false);
     const [showModal, setShowModal] = React.useState(false);
-    const [cardImagePath, setCardImagePath] = React.useState('chameleon_card.jpeg');  // remove later
-    const [showCategoryCard, setShowCategoryCard] = React.useState(true);
-    const [categoryImagePath, setCategoryImagePath] = React.useState('category.jpeg');  // remove later
+    const [cardImagePath, setCardImagePath] = React.useState('');
+    const [showCategoryCard, setShowCategoryCard] = React.useState(false);
+    const [categoryImagePath, setCategoryImagePath] = React.useState('');
+
+    const handleGameStateMessage = (message) => {
+        setPlayers(message.players || []);
+        const {
+            newPhase = '',
+            set_up: newSetUp = {},
+            clue: newClue = {},
+            vote: newVote = {},
+            reveal: newReveal = {},
+        } = message.round;
+        setPhase(newPhase);
+        // TODO: handle completed state
+        setClues(newClue.clues || {});
+        setVotes(newVote.votes || {});
+        setChameleonGuess(newReveal.guess || '');
+
+        setSmallDieRoll(newSetUp.small_die_roll);
+        setBigDieRoll(newSetUp.big_die_roll);
+        setClueSessionOrder(newSetUp.session_ordering);
+        setCategoryImagePath(CATEGORY_IMAGE_PATHS[newSetUp.category || 'default']);
+        setShowModalButton(newPhase !== 'set_up');
+        setShowCategoryCard(newPhase !== 'set_up');
+        if (Boolean(message.chameleon)) {
+            setCardImagePath('chameleon_card.jpeg')
+        } else {
+            setCardImagePath('keycard.jpeg')
+        }
+    };
+
     React.useEffect(() => {
         axios.get('/api/v1/session').then(response => {
             if (response.data.has_session && response.data.has_game) {
@@ -65,11 +102,7 @@ export default function PlayingChameleon() {
                 ws.onopen = () => ws.send(JSON.stringify({
                     'kind': 'players'
                 }));
-                ws.onmessage = event => {
-                    const data = JSON.parse(event.data);
-                    setPlayers(data.players || []);
-                    setPhase(data.round.phase);
-                };
+                ws.onmessage = event => handleGameStateMessage(JSON.parse(event.data));
                 ws.onclose = () => console.log("Figure out how to reconnect");
                 setWebsocket(ws)
             } else {
