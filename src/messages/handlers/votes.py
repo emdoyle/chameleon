@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Optional, TYPE_CHECKING
 from collections import Counter
 from .base import BaseMessageHandler
@@ -7,6 +8,8 @@ if TYPE_CHECKING:
         Session
     )
     from ..data import OutgoingMessages
+
+logger = logging.getLogger('chameleon')
 
 
 class VoteMessageHandler(BaseMessageHandler):
@@ -19,8 +22,9 @@ class VoteMessageHandler(BaseMessageHandler):
 
     def _get_final_vote(self, votes: Dict[int, str]) -> Optional[str]:
         counted_votes = Counter(votes.values())
+        logger.debug("Counted votes: %s", counted_votes)
         if (
-            votes.keys() == self.connected_sessions.keys()
+            {str(key) for key in votes.keys()} == {str(key) for key in self.connected_sessions.keys()}
             and len(counted_votes) <= 2
             and any(count <= 1 for count in counted_votes.values())
         ):

@@ -161,12 +161,16 @@ class GameStateHandler(WebSocketHandler):
                 hasattr(self, 'session_id')
                 and self.session_id is not None
         ):
-            if self.session_id in GameStateHandler.waiters:
-                del GameStateHandler.waiters[self.session_id]
-            if self.session_id in GameStateHandler.ready_states:
-                del GameStateHandler.ready_states[self.session_id]
+            self.clear_session(self.session_id)
         else:
             logger.warning("Closed websocket but did not remove self from memory!\nsession_id: %s", self.session_id)
+
+    @classmethod
+    def clear_session(cls, session_id: int):
+        if session_id in GameStateHandler.waiters:
+            del cls.waiters[session_id]
+        if session_id in GameStateHandler.ready_states:
+            del cls.ready_states[session_id]
 
 
 class SessionAPIHandler(RequestHandler):
@@ -200,6 +204,8 @@ class SessionAPIHandler(RequestHandler):
                 logger.debug("Removed session %s from the DB", session_id)
         self.clear_cookie(name="session_id")
         logger.debug("Cleared cookie for session %s", session_id)
+        GameStateHandler.clear_session(session_id=int(session_id))
+        logger.debug("Cleared session %s from websocket handler", session_id)
         self.set_status(status_code=200)
 
 
