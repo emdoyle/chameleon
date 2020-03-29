@@ -1,6 +1,6 @@
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
-import TextInput from "../utils/TextInput";
+import Select from "../utils/Select";
 import CheckboxInput from "../utils/CheckboxInput";
 
 
@@ -14,17 +14,17 @@ export default function VoteInput(props) {
             spacing={4}
         >
             <Grid item>
-                <TextInput
+                <Select
                     label={props.label}
-                    value={props.textValue}
-                    onChange={props.onTextChange}
+                    value={props.selectedOption}
+                    options={props.options}
+                    onChange={props.onOptionChange}
                     disabled={Boolean(props.checked)}
-                    hideButton
                 />
             </Grid>
             <Grid item>
                 <CheckboxInput
-                    disabled={!Boolean(props.textValue)}
+                    disabled={!Boolean(props.selectedOption)}
                     value={Boolean(props.checked)}
                     onChange={props.onCheckboxChange}
                     label="Confirm"

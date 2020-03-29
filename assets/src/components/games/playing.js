@@ -68,6 +68,11 @@ export default function PlayingChameleon() {
     const [showCategoryCard, setShowCategoryCard] = React.useState(false);
     const [categoryImagePath, setCategoryImagePath] = React.useState('');
 
+    const playerOptions = players.map(player => ({
+        label: player.username || 'User',
+        value: player.username || 'User'
+    }));
+
     const handleGameStateMessage = (message) => {
         setPlayers(message.players || []);
         const {
@@ -167,8 +172,9 @@ export default function PlayingChameleon() {
             return (
                 <VoteInput
                     label="Who is the chameleon?"
-                    textValue={yourVote}
-                    onTextChange={(event) => setYourVote(event.target.value)}
+                    selectedOption={yourVote}
+                    onOptionChange={(event) => setYourVote(event.target.value)}
+                    options={playerOptions}
                     checked={voteLockedIn}
                     onCheckboxChange={(event) => setVoteLockedIn(event.target.checked)}
                 />
@@ -206,7 +212,9 @@ export default function PlayingChameleon() {
                                 <Grid item>
                                     <PlayersTable
                                         players={players}
+                                        sessionOrdering={clueSessionOrder}
                                         clues={clues}
+                                        votes={votes}
                                     />
                                 </Grid>
                             </div>
