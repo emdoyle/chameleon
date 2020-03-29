@@ -38,11 +38,11 @@ class VoteMessageHandler(BaseMessageHandler):
             vote_phase.votes = {
                 key: value
                 for key, value
-                in vote_phase.votes
-                if key != session.id
+                in vote_phase.votes.items()
+                if key != str(session.id)
             }
         else:
-            vote_phase.votes = {**vote_phase.votes, session.id: vote}
+            vote_phase.votes = {**vote_phase.votes, str(session.id): vote}
 
         vote_phase.final_vote = self._get_final_vote(vote_phase.votes)
         self.db_session.add(vote_phase)
