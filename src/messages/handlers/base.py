@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Iterable, Optional, TYPE_CHECKING
 from sqlalchemy.sql.expression import false
 from src.db import (
-    Session, Game, Round, SetUpPhase, CluePhase
+    Session, Game, Round, SetUpPhase, CluePhase, User
 )
 from src.messages.builder import MessageBuilder
 from ..data import OutgoingMessages
@@ -89,6 +89,12 @@ class BaseMessageHandler(AbstractMessageHandler):
 
     def _get_sessions_in_game(self, game_id: int) -> Iterable['Session']:
         return self.db_session.query(Session).filter(Session.game_id == game_id).all()
+
+    def _get_connected_players(self) -> Iterable['User']:
+        connected_session_ids = tuple(self.connected_sessions.keys())
+        return self.db_session.query(User).join(Session, Session.user_id == User.id).filter(
+            Session.id.in_(connected_session_ids)
+        ).all()
 
     def _get_chameleon_session_id(self, game_id: int) -> Optional[int]:
         set_up_phase = self._get_set_up_phase(game_id=game_id)

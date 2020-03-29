@@ -10,9 +10,7 @@ import React from "react";
 
 export default function PlayersTable(props) {
     // TODO: just make players a dictionary by session id or something
-    const players = props.sessionOrdering.map(sessionId => (
-        (props.players || []).find(player => player.session_id === sessionId) || null
-    )).filter(item => Boolean(item));
+    const players = props.players || [];
     const clues = props.clues || {};
     const votes = props.votes || {};
 

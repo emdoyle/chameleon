@@ -83,6 +83,7 @@ class VotePhase(Base):
     id = Column(Integer, primary_key=True)
     round_id = Column(Integer, ForeignKey('rounds.id'))
     votes = Column(JSON, default=dict)
+    final_vote = Column(String)
 
 
 class RevealPhase(Base):

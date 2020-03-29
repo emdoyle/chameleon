@@ -138,6 +138,20 @@ export default function PlayingChameleon() {
         }
     };
 
+    const handleVoteConfirmation = event => {
+        setVoteLockedIn(event.target.checked);
+        if (websocket) {
+            const message = {'kind': 'vote'};
+            if (event.target.checked) {
+                message.action = 'set';
+                message.vote = yourVote;
+            } else {
+                message.action = 'clear';
+            }
+            websocket.send(JSON.stringify(message))
+        }
+    };
+
     // dictionary or other structured data?
     const getPrimaryInput = () => {
         if (!phase) {
@@ -176,11 +190,11 @@ export default function PlayingChameleon() {
                     onOptionChange={(event) => setYourVote(event.target.value)}
                     options={playerOptions}
                     checked={voteLockedIn}
-                    onCheckboxChange={(event) => setVoteLockedIn(event.target.checked)}
+                    onCheckboxChange={handleVoteConfirmation}
                 />
             )
         }
-        if (phase === 'guess') {
+        if (phase === 'reveal') {
             // pass prop to identify if user is chameleon
             return (
                 <GuessInput

@@ -1,4 +1,5 @@
 from typing import Dict, Optional, TYPE_CHECKING
+from collections import Counter
 from .base import BaseMessageHandler
 
 if TYPE_CHECKING:
@@ -9,12 +10,42 @@ if TYPE_CHECKING:
 
 
 class VoteMessageHandler(BaseMessageHandler):
-    @classmethod
-    def _validate_vote(cls, vote: str) -> bool:
-        ...
+    def _validate_vote(self, vote: str) -> bool:
+        connected_players = self._get_connected_players()
+        return vote in {
+            player.username
+            for player in connected_players
+        }
+
+    def _get_final_vote(self, votes: Dict[int, str]) -> Optional[str]:
+        counted_votes = Counter(votes.values())
+        if (
+            votes.keys() == self.connected_sessions.keys()
+            and len(counted_votes) <= 2
+            and any(count <= 1 for count in counted_votes.values())
+        ):
+            return counted_votes.most_common(1)[0][0]
+        return None
 
     def _update_game_state(self, session: 'Session', vote: Optional[str]) -> None:
-        ...
+        current_round = self._get_round(session.game_id)
+        vote_phase = current_round.vote_phase
+        if vote is None:
+            vote_phase.votes = {
+                key: value
+                for key, value
+                in vote_phase.votes
+                if key != session.id
+            }
+        else:
+            vote_phase.votes = {**vote_phase.votes, session.id: vote}
+
+        vote_phase.final_vote = self._get_final_vote(vote_phase.votes)
+        self.db_session.add(vote_phase)
+        if vote_phase.final_vote is not None:
+            current_round.phase = 'reveal'
+            self.db_session.add(current_round)
+        self.db_session.commit()
 
     def handle(self, message: Dict, session: 'Session') -> 'OutgoingMessages':
         if message['kind'] != 'vote':
