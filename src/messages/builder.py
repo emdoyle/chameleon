@@ -10,6 +10,7 @@ from src.db import (
 from .data import OutgoingMessage
 
 if TYPE_CHECKING:
+    from src.server import GameStateHandler
     from src.db import (
         RevealPhase,
         VotePhase,
@@ -25,17 +26,20 @@ class MessageBuilder:
             self,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
+            connected_sessions: Dict[int, 'GameStateHandler']
     ):
         self.db_session = db_session
         self.ready_states = ready_states
+        self.connected_sessions = connected_sessions
 
     @classmethod
     def factory(
             cls,
             db_session: 'DBSession',
-            ready_states: Dict[int, bool]
+            ready_states: Dict[int, bool],
+            connected_sessions: Dict[int, 'GameStateHandler']
     ):
-        return cls(db_session=db_session, ready_states=ready_states)
+        return cls(db_session=db_session, ready_states=ready_states, connected_sessions=connected_sessions)
 
     @classmethod
     def _build_reveal_dict(cls, reveal_phase: Optional['RevealPhase']) -> Dict:
@@ -91,30 +95,24 @@ class MessageBuilder:
     def _build_players_dict(
             self,
             players: List['User'],
-            session_id: int,
-            current_round: 'Round'
     ) -> Dict:
         result = {'players': []}
         for player in players:
+            session_id = player.session.id
+            if session_id not in self.connected_sessions:
+                logger.error("Session %s has disconnected from the game!", player.id)
+                continue
             entry = {
                 'id': player.id,
+                'session_id': session_id,
                 'username': player.username,
-                'ready': self.ready_states[player.id]
+                'ready': self.ready_states[session_id]
             }
-            if (
-                session_id == player.session.id
-                and current_round.set_up_phase
-                and current_round.set_up_phase.chameleon_session_id == session_id
-            ):
-                # TODO: this is oversharing since `session_id` is not the recipient
-                logger.debug("Showing session %s that they are the chameleon!", session_id)
-                entry['chameleon'] = True
             result['players'].append(entry)
         return result
 
     def create_full_game_state_message(
             self,
-            session_id: int,
             game_id: int,
     ) -> 'OutgoingMessage':
         first_uncompleted_round = self.db_session.query(Round).filter(
@@ -130,8 +128,6 @@ class MessageBuilder:
         ).all()
         players_dict = self._build_players_dict(
             players=players_in_game,
-            session_id=session_id,
-            current_round=first_uncompleted_round
         )
 
         return OutgoingMessage(

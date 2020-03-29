@@ -127,8 +127,8 @@ class GameStateHandler(WebSocketHandler):
         initial_state_message = MessageBuilder.factory(
             db_session=db_session,
             ready_states=GameStateHandler.ready_states,  # is this safe?
+            connected_sessions=GameStateHandler.waiters
         ).create_full_game_state_message(
-            session_id=session.id,
             game_id=session.game_id
         )
         GameStateHandler.send_outgoing_messages(outgoing_messages=OutgoingMessages(
@@ -149,7 +149,8 @@ class GameStateHandler(WebSocketHandler):
             message=json_decode(message),
             db_session=db_session,
             session=session,
-            ready_states=GameStateHandler.ready_states
+            ready_states=GameStateHandler.ready_states,
+            connected_sessions=GameStateHandler.waiters
         )
         GameStateHandler.send_outgoing_messages(outgoing_messages=outgoing_messages)
         db_session.close()

@@ -8,6 +8,7 @@ from src.messages.handlers import (
 )
 
 if TYPE_CHECKING:
+    from src.server import GameStateHandler
     from src.db import (
         DBSession,
         Session
@@ -30,7 +31,8 @@ class MessageDispatch:
             message: Dict,
             db_session: 'DBSession',
             session: 'Session',
-            ready_states: Dict[int, bool]
+            ready_states: Dict[int, bool],
+            connected_sessions: Dict[int, 'GameStateHandler']
     ) -> 'OutgoingMessages':
         try:
             kind = message['kind']
@@ -41,6 +43,7 @@ class MessageDispatch:
         return cls.HANDLERS[kind].factory(
             db_session=db_session,
             ready_states=ready_states,
+            connected_sessions=connected_sessions,
         ).handle(
             message=message,
             session=session
