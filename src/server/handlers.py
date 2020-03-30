@@ -1,6 +1,6 @@
 import sys
 import logging
-from typing import Optional
+from typing import Optional, Dict, Set
 from collections import defaultdict
 from urllib.parse import urlparse
 from tornado.web import StaticFileHandler, RequestHandler
@@ -90,6 +90,29 @@ class GameStateHandler(WebSocketHandler):
                 except KeyError:
                     logger.warning("Recipient %s is not attached to websocket", recipient)
 
+    @classmethod
+    def _session_ids_for_game(cls, db_session: 'DBSession', game_id: int) -> Set[int]:
+        sessions_in_game = db_session.query(Session).join(Game, Game.id == Session.game_id).filter(
+            Game.id == game_id
+        ).all()
+        return {session.id for session in sessions_in_game}
+
+    def ready_states_for_game(self, db_session: 'DBSession', game_id: int) -> Dict[int, bool]:
+        session_ids = self._session_ids_for_game(db_session, game_id)
+        return {
+            key: value
+            for key, value in self.ready_states.items()
+            if key in session_ids
+        }
+
+    def connected_sessions_in_game(self, db_session: 'DBSession', game_id: int) -> Dict[int, 'GameStateHandler']:
+        session_ids = self._session_ids_for_game(db_session, game_id)
+        return {
+            key: value
+            for key, value in self.waiters.items()
+            if key in session_ids
+        }
+
     def check_origin(self, origin: str):
         parsed = urlparse(origin)
         return parsed.hostname in CORS_ORIGINS
@@ -126,8 +149,8 @@ class GameStateHandler(WebSocketHandler):
 
         initial_state_message = MessageBuilder.factory(
             db_session=db_session,
-            ready_states=GameStateHandler.ready_states,  # is this safe?
-            connected_sessions=GameStateHandler.waiters
+            ready_states=self.ready_states_for_game(db_session, session.game_id),
+            connected_sessions=self.connected_sessions_in_game(db_session, session.game_id)
         ).create_full_game_state_message(
             game_id=session.game_id
         )
@@ -149,8 +172,8 @@ class GameStateHandler(WebSocketHandler):
             message=json_decode(message),
             db_session=db_session,
             session=session,
-            ready_states=GameStateHandler.ready_states,
-            connected_sessions=GameStateHandler.waiters
+            ready_states=self.ready_states_for_game(db_session, session.game_id),
+            connected_sessions=self.connected_sessions_in_game(db_session, session.game_id)
         )
         GameStateHandler.send_outgoing_messages(outgoing_messages=outgoing_messages)
         db_session.close()
