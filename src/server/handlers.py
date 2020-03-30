@@ -1,6 +1,6 @@
 import sys
 import logging
-from typing import Optional, Dict, Set, DefaultDict
+from typing import Optional, Dict, Set
 from collections import defaultdict
 from urllib.parse import urlparse
 from tornado.web import StaticFileHandler, RequestHandler
@@ -97,13 +97,12 @@ class GameStateHandler(WebSocketHandler):
         ).all()
         return {session.id for session in sessions_in_game}
 
-    def ready_states_for_game(self, db_session: 'DBSession', game_id: int) -> DefaultDict[int, bool]:
+    def ready_states_for_game(self, db_session: 'DBSession', game_id: int) -> Dict[int, bool]:
         session_ids = self._session_ids_for_game(db_session, game_id)
-        return defaultdict(lambda: False, {
-            key: value
-            for key, value in self.ready_states.items()
-            if key in session_ids
-        })
+        return {
+            session_id: self.ready_states[session_id]
+            for session_id in session_ids
+        }
 
     def connected_sessions_in_game(self, db_session: 'DBSession', game_id: int) -> Dict[int, 'GameStateHandler']:
         session_ids = self._session_ids_for_game(db_session, game_id)

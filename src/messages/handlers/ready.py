@@ -36,6 +36,7 @@ class ReadyMessageHandler(BaseMessageHandler):
             session.id
             for session in self._get_sessions_in_game(game_id=session.game_id)
         }
+
         if all((value for key, value in self.ready_states.items() if key in session_ids)):
             self._handle_full_ready(session.game_id, session_ids=session_ids)
             filter_self = False
