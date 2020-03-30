@@ -31,6 +31,7 @@ class ReadyMessageHandler(BaseMessageHandler):
 
         self.ready_states[session.id] = ready_state
         # TODO: in-memory ready states are hard to deal with, just use DB
+        self.websocket_state.ready_states[session.id] = ready_state
         logger.debug('Ready states: %s', self.ready_states)
         filter_self = True
 

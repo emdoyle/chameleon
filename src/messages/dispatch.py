@@ -32,7 +32,8 @@ class MessageDispatch:
             db_session: 'DBSession',
             session: 'Session',
             ready_states: Dict[int, bool],
-            connected_sessions: Dict[int, 'GameStateHandler']
+            connected_sessions: Dict[int, 'GameStateHandler'],
+            websocket_state: 'GameStateHandler'
     ) -> 'OutgoingMessages':
         try:
             kind = message['kind']
@@ -44,6 +45,7 @@ class MessageDispatch:
             db_session=db_session,
             ready_states=ready_states,
             connected_sessions=connected_sessions,
+            websocket_state=websocket_state,
         ).handle(
             message=message,
             session=session

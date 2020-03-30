@@ -25,6 +25,7 @@ class AbstractMessageHandler(ABC):
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
             connected_sessions: Dict[int, 'GameStateHandler'],
+            websocket_state: 'GameStateHandler'
     ):
         ...
 
@@ -38,15 +39,18 @@ class BaseMessageHandler(AbstractMessageHandler):
             self,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
-            connected_sessions: Dict[int, 'GameStateHandler']
+            connected_sessions: Dict[int, 'GameStateHandler'],
+            websocket_state: 'GameStateHandler'
     ):
         self.db_session = db_session
         self.ready_states = ready_states
         self.connected_sessions = connected_sessions
+        self.websocket_state = websocket_state
         self.message_builder = MessageBuilder.factory(
             db_session=db_session,
             ready_states=ready_states,
-            connected_sessions=connected_sessions
+            connected_sessions=connected_sessions,
+            websocket_state=websocket_state
         )
 
     @classmethod
@@ -55,8 +59,14 @@ class BaseMessageHandler(AbstractMessageHandler):
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
             connected_sessions: Dict[int, 'GameStateHandler'],
+            websocket_state: 'GameStateHandler'
     ):
-        return cls(db_session=db_session, ready_states=ready_states, connected_sessions=connected_sessions)
+        return cls(
+            db_session=db_session,
+            ready_states=ready_states,
+            connected_sessions=connected_sessions,
+            websocket_state=websocket_state
+        )
 
     def _get_username_for_session_id(self, session_id: int) -> str:
         user = self.db_session.query(User).join(Session, Session.user_id == User.id).filter(
