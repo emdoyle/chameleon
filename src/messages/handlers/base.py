@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Iterable, Optional, TYPE_CHECKING
+from typing import Dict, Iterable, Optional, Type, TYPE_CHECKING
 from sqlalchemy.sql.expression import false
 from src.db import (
     Session, Game, Round, SetUpPhase, CluePhase, User
@@ -25,7 +25,7 @@ class AbstractMessageHandler(ABC):
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
             connected_sessions: Dict[int, 'GameStateHandler'],
-            websocket_state: 'GameStateHandler'
+            websocket_state: Type['GameStateHandler']
     ):
         ...
 
@@ -40,7 +40,7 @@ class BaseMessageHandler(AbstractMessageHandler):
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
             connected_sessions: Dict[int, 'GameStateHandler'],
-            websocket_state: 'GameStateHandler'
+            websocket_state: Type['GameStateHandler']
     ):
         self.db_session = db_session
         self.ready_states = ready_states
@@ -59,7 +59,7 @@ class BaseMessageHandler(AbstractMessageHandler):
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
             connected_sessions: Dict[int, 'GameStateHandler'],
-            websocket_state: 'GameStateHandler'
+            websocket_state: Type['GameStateHandler']
     ):
         return cls(
             db_session=db_session,

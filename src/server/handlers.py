@@ -151,7 +151,8 @@ class GameStateHandler(WebSocketHandler):
         initial_state_message = MessageBuilder.factory(
             db_session=db_session,
             ready_states=self.ready_states_for_game(db_session, session.game_id),
-            connected_sessions=self.connected_sessions_in_game(db_session, session.game_id)
+            connected_sessions=self.connected_sessions_in_game(db_session, session.game_id),
+            websocket_state=GameStateHandler
         ).create_full_game_state_message(
             game_id=session.game_id
         )
@@ -176,7 +177,8 @@ class GameStateHandler(WebSocketHandler):
             db_session=db_session,
             session=session,
             ready_states=self.ready_states_for_game(db_session, session.game_id),
-            connected_sessions=self.connected_sessions_in_game(db_session, session.game_id)
+            connected_sessions=self.connected_sessions_in_game(db_session, session.game_id),
+            websocket_state=GameStateHandler
         )
         GameStateHandler.send_outgoing_messages(outgoing_messages=outgoing_messages)
         db_session.close()
