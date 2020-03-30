@@ -30,15 +30,12 @@ class ReadyMessageHandler(BaseMessageHandler):
             raise ValueError("Malformed message sent to ReadyMessageHandler")
 
         self.ready_states[session.id] = ready_state
+        # TODO: in-memory ready states are hard to deal with, just use DB
         logger.debug('Ready states: %s', self.ready_states)
         filter_self = True
-        session_ids = {
-            session.id
-            for session in self._get_sessions_in_game(game_id=session.game_id)
-        }
 
-        if all((value for key, value in self.ready_states.items() if key in session_ids)):
-            self._handle_full_ready(session.game_id, session_ids=session_ids)
+        if all((value for key, value in self.ready_states.items())):
+            self._handle_full_ready(session.game_id)
             filter_self = False
 
         return self._default_messages(
@@ -47,8 +44,12 @@ class ReadyMessageHandler(BaseMessageHandler):
             filter_self=filter_self,
         )
 
-    def _handle_full_ready(self, game_id: int, session_ids: Set[int]) -> None:
+    def _handle_full_ready(self, game_id: int) -> None:
         # TODO: cache this in thread
+        session_ids = {
+            session.id
+            for session in self._get_sessions_in_game(game_id=game_id)
+        }
         set_up_phase = self.db_session.query(SetUpPhase).join(
             Round, SetUpPhase.round_id == Round.id
         ).filter(
