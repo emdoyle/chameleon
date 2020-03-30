@@ -109,7 +109,7 @@ class BaseMessageHandler(AbstractMessageHandler):
         return self.db_session.query(Session).filter(Session.game_id == game_id).all()
 
     def _get_connected_players(self) -> Iterable['User']:
-        connected_session_ids = tuple(self.connected_sessions.keys())  # TODO: IN_GAME only
+        connected_session_ids = tuple(self.connected_sessions.keys())
         return self.db_session.query(User).join(Session, Session.user_id == User.id).filter(
             Session.id.in_(connected_session_ids)
         ).all()
@@ -135,7 +135,7 @@ class BaseMessageHandler(AbstractMessageHandler):
         return next((
             session_id
             for session_id in session_ordering
-            if str(session_id) not in clue_phase.clues and session_id in self.connected_sessions  # TODO: IN_GAME only
+            if str(session_id) not in clue_phase.clues and session_id in self.connected_sessions
         ), None)
 
     def _default_messages(self, game_id: int, session_id: int, filter_self: bool = True) -> 'OutgoingMessages':

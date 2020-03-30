@@ -24,9 +24,9 @@ class VoteMessageHandler(BaseMessageHandler):
         counted_votes = Counter(votes.values())
         logger.debug("Counted votes: %s", counted_votes)
         if (
-            {str(key) for key in votes.keys()} == {str(key) for key in self.connected_sessions.keys()}  # TODO: IN_GAME only
+            {str(key) for key in votes.keys()} == {str(key) for key in self.connected_sessions.keys()}
             and len(counted_votes) <= 2
-            and any(count <= 1 for count in counted_votes.values())
+            and (len(counted_votes) == 1 or any(count <= 1 for count in counted_votes.values()))
         ):
             return counted_votes.most_common(1)[0][0]
         return None
