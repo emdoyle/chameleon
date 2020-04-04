@@ -24,7 +24,7 @@ export default function PlayersTable(props) {
                 </TableHead>
                 <TableBody>
                     {players.map(player => (
-                        <TableRow key={player.username}>
+                        <TableRow key={`players-table-row-${player.username}`}>
                             <TableCell style={{width: '20%'}}>{player.username}</TableCell>
                             <TableCell style={{width: '50%'}}>{clues[player.id] || '...'}</TableCell>
                             <TableCell style={{width: '30%'}}>{votes[player.session_id] || '...'}</TableCell>

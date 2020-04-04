@@ -5,6 +5,9 @@ PUBLIC_FILES = $(wildcard assets/public/*)
 
 all: dist
 
+serve:
+	python src/main.py
+
 dist:
 	cd assets/ && yarn build
 

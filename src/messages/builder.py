@@ -1,5 +1,6 @@
 import logging
 from typing import Dict, List, Optional, Type, TYPE_CHECKING
+from sqlalchemy import func
 from sqlalchemy.sql.expression import false
 from src.db import (
     DBSession,
@@ -81,7 +82,6 @@ class MessageBuilder:
             'category': set_up_phase.category,
             'big_die_roll': set_up_phase.big_die_roll,
             'small_die_roll': set_up_phase.small_die_roll,
-            'session_ordering': set_up_phase.session_ordering,
         }
 
     @classmethod
@@ -134,9 +134,18 @@ class MessageBuilder:
             Session, Session.user_id == User.id
         ).filter(
             Session.game_id == game_id
-        ).all()
+        )
+
+        if (
+                first_uncompleted_round.set_up_phase is not None
+                and first_uncompleted_round.set_up_phase.session_ordering is not None
+        ):
+            players_in_game = players_in_game.order_by(
+                func.array_position(first_uncompleted_round.set_up_phase.session_ordering, Session.id)
+            )
+
         players_dict = self._build_players_dict(
-            players=players_in_game,
+            players=players_in_game.all(),
         )
 
         return OutgoingMessage(

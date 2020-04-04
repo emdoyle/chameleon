@@ -101,7 +101,6 @@ export default function PlayingChameleon() {
     const [phase, setPhase] = React.useState('');
     const [players, setPlayers] = React.useState([]);
     const [clues, setClues] = React.useState({});
-    const [clueSessionOrder, setClueSessionOrder] = React.useState([]);
     const [votes, setVotes] = React.useState({});
     const [showModalButton, setShowModalButton] = React.useState(false);
     const [showModal, setShowModal] = React.useState(false);
@@ -133,7 +132,6 @@ export default function PlayingChameleon() {
 
         setSmallDieRoll(newSetUp.small_die_roll);
         setBigDieRoll(newSetUp.big_die_roll);
-        setClueSessionOrder(newSetUp.session_ordering);
         setCategoryImagePath(CATEGORY_IMAGE_PATHS[newSetUp.category || 'default']);
         setShowModalButton(newPhase !== 'set_up');
         setShowCategoryCard(newPhase !== 'set_up');
@@ -222,7 +220,6 @@ export default function PlayingChameleon() {
             )
         }
         if (phase === 'clue') {
-            // pass prop to identify if it is user's turn to give clue
             return (
                 <ClueInput
                     hidden={!Boolean(isYourClueTurn)}
@@ -276,7 +273,6 @@ export default function PlayingChameleon() {
                                 <Grid item>
                                     <PlayersTable
                                         players={players}
-                                        sessionOrdering={clueSessionOrder}
                                         clues={clues}
                                         votes={votes}
                                     />
