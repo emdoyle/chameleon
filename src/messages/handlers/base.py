@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Iterable, Optional, Type, TYPE_CHECKING
 from sqlalchemy.sql.expression import false
 from src.db import (
-    Session, Game, Round, SetUpPhase, CluePhase, User
+    Session, Game, Round, SetUpPhase, CluePhase, RevealPhase, User
 )
 from src.messages.builder import MessageBuilder
 from ..data import OutgoingMessages
@@ -105,6 +105,17 @@ class BaseMessageHandler(AbstractMessageHandler):
             Game.id == game_id
         ).first()
 
+    def _get_reveal_phase(self, game_id: int) -> Optional['RevealPhase']:
+        return self.db_session.query(RevealPhase).join(
+            Round, Round.id == RevealPhase.round_id
+        ).join(
+            Game, Game.id == Round.game_id
+        ).filter(
+            Round.completed == false()
+        ).filter(
+            Game.id == game_id
+        ).first()
+
     def _get_sessions_in_game(self, game_id: int) -> Iterable['Session']:
         return self.db_session.query(Session).filter(Session.game_id == game_id).all()
 
@@ -137,6 +148,12 @@ class BaseMessageHandler(AbstractMessageHandler):
             for session_id in session_ordering
             if str(session_id) not in clue_phase.clues and session_id in self.connected_sessions
         ), None)
+
+    def _update_game_ending(self, game_id: int, winner: str) -> None:
+        current_round = self._get_round(game_id)
+        current_round.winner = winner
+        self.db_session.add(current_round)
+        self.db_session.commit()  # TODO: already in weird territory when it comes to committing unexpectedly
 
     def _default_messages(self, game_id: int, session_id: int, filter_self: bool = True) -> 'OutgoingMessages':
         sessions_in_game = self._get_sessions_in_game(game_id)

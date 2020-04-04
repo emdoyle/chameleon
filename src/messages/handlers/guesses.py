@@ -32,16 +32,14 @@ class GuessMessageHandler(BaseMessageHandler):
         return correct_answer == guess.lower()
 
     def _update_game_state(self, session: 'Session', guess: str, guess_is_correct: bool) -> None:
-        current_round = self._get_round(session.game_id)
-        reveal_phase = current_round.reveal_phase
+        reveal_phase = self._get_reveal_phase(session.game_id)
         reveal_phase.guess = guess
-        if guess_is_correct:
-            current_round.winner = "The Chameleon"
-        else:
-            current_round.winner = "The People"
-        self.db_session.add(current_round)
         self.db_session.add(reveal_phase)
         self.db_session.commit()
+        if guess_is_correct:
+            self._update_game_ending(session.game_id, "The Chameleon")
+        else:
+            self._update_game_ending(session.game_id, "The People")
 
     def handle(self, message: Dict, session: 'Session') -> 'OutgoingMessages':
         if message['kind'] != 'guess':

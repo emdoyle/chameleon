@@ -49,6 +49,10 @@ class VoteMessageHandler(BaseMessageHandler):
         if vote_phase.final_vote is not None:
             current_round.phase = 'reveal'
             self.db_session.add(current_round)
+            # TODO: need caching or something, way too many queries throughout handlers
+            chameleon_username = self._get_username_for_session_id(self._get_chameleon_session_id(session.game_id))
+            if vote_phase.final_vote.lower() != chameleon_username.lower():
+                self._update_game_ending(session.game_id, "The Chameleon")
         self.db_session.commit()
 
     def handle(self, message: Dict, session: 'Session') -> 'OutgoingMessages':
