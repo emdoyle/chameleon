@@ -8,6 +8,7 @@ from src.db import (
     Round,
     Session
 )
+from src.categories import decode
 from .data import OutgoingMessage
 
 if TYPE_CHECKING:
@@ -88,7 +89,7 @@ class MessageBuilder:
     def _build_round_dict(cls, current_round: Optional['Round']) -> Dict:
         if current_round is None:
             return {}
-        return {
+        round_dict = {
             'round': {
                 'id': current_round.id,
                 'phase': current_round.phase,
@@ -100,6 +101,15 @@ class MessageBuilder:
                 'reveal': cls._build_reveal_dict(current_round.reveal_phase),
             }
         }
+
+        if current_round.winner:
+            set_up_phase = current_round.set_up_phase
+            round_dict['correct_answer'] = decode(
+                set_up_phase.category,
+                set_up_phase.big_die_roll,
+                set_up_phase.small_die_roll
+            )
+        return round_dict
 
     def _build_players_dict(
             self,

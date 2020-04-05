@@ -40,7 +40,18 @@ export default function WinnerModal(props) {
             disableAutoFocus
         >
             <div className={styleClasses.modal}>
-                <div className={styleClasses.modalContent}>{`The winner is: ${props.value || ''}!`}</div>
+                <div className={styleClasses.modalContent}>
+                    {`The winner is: ${props.value || ''}!`}
+                    <br />
+                    <br />
+                    {Boolean(props.chameleonGuess) && (
+                        <React.Fragment>
+                        {`The Chameleon guessed: ${props.chameleonGuess}.`}
+                        <br />
+                        </React.Fragment>
+                    )}
+                    {`The word was: ${props.correctAnswer || '(Unknown)'}.`}
+                </div>
             </div>
         </Modal>
     );

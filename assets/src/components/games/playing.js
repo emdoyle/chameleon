@@ -36,7 +36,7 @@ const useStyles = makeStyles(() => ({
     },
     userTable: {
         minHeight: '100%',
-        minWidth: '40%'
+        minWidth: '45%'
     },
     categoryCard: {
         minHeight: '100%',
@@ -108,6 +108,7 @@ export default function PlayingChameleon() {
     const [cardImagePath, setCardImagePath] = React.useState('');
     const [showCategoryCard, setShowCategoryCard] = React.useState(false);
     const [categoryImagePath, setCategoryImagePath] = React.useState('');
+    const [correctAnswer, setCorrectAnswer] = React.useState('');
 
     const playerOptions = players.map(player => ({
         label: player.username || 'User',
@@ -144,6 +145,7 @@ export default function PlayingChameleon() {
         setChameleon(message.chameleon);
         setChameleonGuess(newReveal.guess || '');
         setWinner(newWinner);
+        setCorrectAnswer(message.correct_answer || '');
         setShowWinnerModal(Boolean(newWinner));
     };
 
@@ -350,6 +352,8 @@ export default function PlayingChameleon() {
             <WinnerModal
                 open={showWinnerModal}
                 value={winner}
+                chameleonGuess={chameleonGuess}
+                correctAnswer={correctAnswer}
                 onClose={() => setShowWinnerModal(false)}
             />
         </React.Fragment>
