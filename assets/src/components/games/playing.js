@@ -257,6 +257,7 @@ export default function PlayingChameleon() {
                                 <Grid item>
                                     <PlayersTable
                                         players={players}
+                                        showReady={phase === 'set_up'}
                                         clues={clues}
                                         votes={votes}
                                     />

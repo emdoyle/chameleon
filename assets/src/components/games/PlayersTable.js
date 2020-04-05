@@ -9,7 +9,6 @@ import React from "react";
 
 
 export default function PlayersTable(props) {
-    // TODO: just make players a dictionary by session id or something
     const players = props.players || [];
     const clues = props.clues || {};
     const votes = props.votes || {};
@@ -19,6 +18,7 @@ export default function PlayersTable(props) {
             <Table>
                 <TableHead>
                     <TableCell>User</TableCell>
+                    {props.showReady && (<TableCell>Ready?</TableCell>)}
                     <TableCell>Clue given</TableCell>
                     <TableCell>Vote</TableCell>
                 </TableHead>
@@ -26,6 +26,11 @@ export default function PlayersTable(props) {
                     {players.map(player => (
                         <TableRow key={`players-table-row-${player.username}`}>
                             <TableCell style={{width: '20%'}}>{player.username}</TableCell>
+                            {props.showReady && (
+                                <TableCell style={{width: '20%'}}>{
+                                    player.ready ? "Ready" : "Not ready"
+                                }</TableCell>
+                            )}
                             <TableCell style={{width: '50%'}}>{clues[player.id] || '...'}</TableCell>
                             <TableCell style={{width: '30%'}}>{votes[player.session_id] || '...'}</TableCell>
                         </TableRow>
