@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import Paper from '@material-ui/core/Paper';
 import { makeStyles } from "@material-ui/core/styles";
 import ReadyInput from "./ReadyInput";
 import ClueInput from "./ClueInput";
@@ -13,6 +12,7 @@ import PlayersTable from "./PlayersTable";
 import CardModal from "./CardModal";
 import CategoryCard from "./CategoryCard";
 import WinnerModal from "./WinnerModal";
+import Dice from "../utils/Dice";
 import {
     CATEGORY_IMAGE_PATHS
 } from "../utils/constants";
@@ -57,24 +57,6 @@ const useStyles = makeStyles(() => ({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center'
-    },
-    rightDie: {
-        width: '100px',
-        height: '100px',
-        backgroundColor: '#4eb5de',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    leftDie: {
-        width: '150px',
-        height: '150px',
-        backgroundColor: '#e3d452',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
     }
 }));
 
@@ -302,10 +284,7 @@ export default function PlayingChameleon() {
                             <div className={styleClasses.leftDieContainer}>
                                 <Grid item>
                                     {Boolean(bigDieRoll) && (
-                                        <Paper
-                                            variant="outlined"
-                                            className={styleClasses.leftDie}
-                                        >{bigDieRoll}</Paper>
+                                        <Dice bigDie roll={bigDieRoll} />
                                     )}
                                 </Grid>
                             </div>
@@ -332,10 +311,7 @@ export default function PlayingChameleon() {
                             <div className={styleClasses.rightDieContainer}>
                                 <Grid item>
                                     {Boolean(smallDieRoll) && (
-                                        <Paper
-                                            variant="outlined"
-                                            className={styleClasses.rightDie}
-                                        >{smallDieRoll}</Paper>
+                                        <Dice smallDie roll={smallDieRoll} />
                                     )}
                                 </Grid>
                             </div>

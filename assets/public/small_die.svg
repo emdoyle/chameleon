@@ -1,0 +1,21 @@
+<svg width="131" height="131" xmlns="http://www.w3.org/2000/svg" style="vector-effect: non-scaling-stroke;" stroke="null">
+ <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+ <g stroke="null">
+  <title stroke="null">background</title>
+  <rect stroke="null" fill="none" id="canvas_background" height="133" width="133" y="-1" x="-1"/>
+  <g style="vector-effect: non-scaling-stroke;" stroke="null" display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
+   <rect stroke="null" fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
+  </g>
+ </g>
+ <g stroke="null">
+  <title stroke="null">Layer 1</title>
+  <line stroke="#000" style="vector-effect: non-scaling-stroke;" stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_5" y2="0.75" x2="54.75" y1="88.750002" x1="110.750003" stroke-width="1.5" fill="none"/>
+  <line stroke="#000" stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_6" y2="88.75" x2="109.75" y1="88.75" x1="1.75" stroke-width="1.5" fill="none"/>
+  <line stroke="#000" stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_7" y2="74.874999" x2="129.124997" y1="1.500001" x1="55.500001" stroke-width="1.5" fill="none"/>
+  <line stroke="#000" stroke-linecap="undefined" stroke-linejoin="undefined" id="svg_8" y2="74.5" x2="128.625001" y1="88.750001" x1="109.75" stroke-width="1.5" fill="none"/>
+  <path stroke="#000" id="svg_16" d="m2.223123,88.202089l53.75,-86.249999l53.75,86.249999l-107.5,0z" stroke-opacity="null" stroke-width="1.5" fill="#426373"/>
+  <path stroke="#000" id="svg_17" d="m2.869378,88.765839l53.624999,40.250012l53.625,-40.250012l-107.249999,0z" stroke-opacity="null" stroke-width="1.5" fill="#426373"/>
+  <path id="svg_21" d="m110.25,88c0.125,0.113281 18.625,-13.636719 18.625,-13.886719l-18.625,13.886719z" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#426373"/>
+  <path stroke="#000" id="svg_22" d="m110.562928,88.11328l18.187072,-13.480347l-73.249999,-72.882933" stroke-opacity="null" stroke-width="0" fill="#426373"/>
+ </g>
+</svg>
