@@ -18,11 +18,12 @@ class GuessMessageHandler(BaseMessageHandler):
 
     def _check_guess(self, session: 'Session', guess: str) -> bool:
         set_up_phase = self._get_set_up_phase(session.game_id)
-        return decode(
+        expected_answer = decode(
             category=set_up_phase.category,
             big_die_roll=set_up_phase.big_die_roll,
             small_die_roll=set_up_phase.small_die_roll,
-        ) == guess.lower()
+        )
+        return expected_answer is not None and expected_answer.lower() == guess.lower()
 
     def _update_game_state(self, session: 'Session', guess: str, guess_is_correct: bool) -> None:
         reveal_phase = self._get_reveal_phase(session.game_id)

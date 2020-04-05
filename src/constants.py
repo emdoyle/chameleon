@@ -1,4 +1,5 @@
 CARD_FILE_NAMES = [
+    r"small_die.svg",
     r"keycard.jpeg",
     r"chameleon_card.jpeg",
     r"arts.jpeg",
