@@ -15,7 +15,6 @@ spec:
       labels:
         app: chameleon
     spec:
-      # TODO: secrets for DB creds
       containers:
       - name: chameleonserver
         image: emdoyle/chameleon:latest

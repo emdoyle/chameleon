@@ -237,6 +237,7 @@ class SessionAPIHandler(RequestHandler):
         else:
             logger.debug("No session id found")
         self.set_status(status_code=200)
+        db_session.close()
 
 
 class UserAPIHandler(RequestHandler):
