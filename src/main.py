@@ -13,6 +13,7 @@ from src.server import (
 from src.constants import (
     CARD_PATHS,
 )
+from src.key_value import AIORedisContainer
 
 
 def make_app():
@@ -30,4 +31,6 @@ def make_app():
 if __name__ == '__main__':
     app = make_app()
     app.listen(8888)  # TODO: ENV
-    tornado.ioloop.IOLoop.current().start()
+    io_loop = tornado.ioloop.IOLoop.current()
+    io_loop.run_sync(AIORedisContainer.set_client)
+    io_loop.start()

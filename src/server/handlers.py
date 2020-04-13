@@ -2,19 +2,27 @@ import sys
 import logging
 from typing import Optional, Dict, Set
 from collections import defaultdict
+from functools import partial
 from urllib.parse import urlparse
 from tornado.web import StaticFileHandler, RequestHandler
 from tornado.websocket import WebSocketHandler
+from tornado.ioloop import IOLoop
 from tornado.escape import json_decode, json_encode
 from src.db import (
     DBSession, User, Session, Game, Round,
     SetUpPhase, CluePhase, VotePhase, RevealPhase
 )
+from src.key_value import r, AIORedisContainer
 from src.messages.data import OutgoingMessages
 from src.messages.builder import MessageBuilder
 from src.messages.dispatch import MessageDispatch
 from src.settings import CORS_ORIGINS
-from src.constants import CARD_FILE_NAMES
+from src.constants import (
+    CARD_FILE_NAMES,
+    GAME_TOPIC_KEY,
+    READY_STATES_KEY,
+    RESTART_STATES_KEY
+)
 
 logger = logging.getLogger('chameleon')  # TODO: ENV
 logger.addHandler(logging.StreamHandler(sys.stdout))
@@ -99,6 +107,15 @@ class GameStateHandler(WebSocketHandler):
 
     def ready_states_for_game(self, db_session: 'DBSession', game_id: int) -> Dict[int, bool]:
         session_ids = self._session_ids_for_game(db_session, game_id)
+        # TODO: this is how to grab a bunch of ready states simultaneously from Redis
+        # r_pipe = r.pipeline()
+        # for session_id in session_ids:
+        #     r_pipe.hget(READY_STATES_KEY, str(session_id))
+        # ready_states = r_pipe.execute()
+        # return {
+        #     session_id: ready_state
+        #     for ready_state, session_id in zip(ready_states, session_ids)
+        # }
         return {
             session_id: self.ready_states[session_id]
             for session_id in session_ids
@@ -106,6 +123,12 @@ class GameStateHandler(WebSocketHandler):
 
     def connected_sessions_in_game(self, db_session: 'DBSession', game_id: int) -> Dict[int, 'GameStateHandler']:
         session_ids = self._session_ids_for_game(db_session, game_id)
+        # this needs to look at Redis to figure out what sessions are actually listening to the game topic
+        # normally would just be creating a subscription and others wouldnt know
+        # but now others want a list of everyone subscribed
+        # redis natively will give the number of subscribers but no more info
+        # CONNECTED_SESSIONS_KEY:{game_id} @session_id = 'True'
+        # and cross-check with db sessions in game
         return {
             key: value
             for key, value in self.waiters.items()
@@ -136,6 +159,17 @@ class GameStateHandler(WebSocketHandler):
             return None
         return current_session
 
+    async def _read_messages_from_channel(self, channel):
+        while await channel.wait_message():
+            msg = await channel.get()
+            logger.info("Message: %s", msg)
+
+    async def accept_from_redis_topic(self, game_id: int):
+        aio_r = AIORedisContainer.get_client()
+        subscription = await aio_r.subscribe(f"{GAME_TOPIC_KEY}:{str(game_id)}")
+        logger.info("Subscribing to channel: %s", subscription[0])
+        await self._read_messages_from_channel(subscription[0])
+
     def open(self):
         logger.info("Opened websocket")
         logger.debug("Ready states: %s", self.ready_states)
@@ -148,25 +182,17 @@ class GameStateHandler(WebSocketHandler):
         self.session_id = session.id
         GameStateHandler.waiters[self.session_id] = self
 
-        initial_state_message = MessageBuilder.factory(
-            db_session=db_session,
-            ready_states=self.ready_states_for_game(db_session, session.game_id),
-            connected_sessions=self.connected_sessions_in_game(db_session, session.game_id),
-            websocket_state=GameStateHandler
-        ).create_full_game_state_message(
-            game_id=session.game_id
+        # This kicks off the redis subscription coroutine within the main IOLoop
+        IOLoop.current().spawn_callback(
+            lambda: self.accept_from_redis_topic(game_id=session.game_id),
         )
-        GameStateHandler.send_outgoing_messages(outgoing_messages=OutgoingMessages(
-            messages={
-                self.session_id: [initial_state_message]
-            }
-        ))
+
         db_session.close()
 
     def on_message(self, message):
         logger.info("Received message: {}".format(message))
         logger.debug("Ready states: %s", self.ready_states)
-        logger.debug("Connected sesssions: %s", self.waiters)
+        logger.debug("Connected sessions: %s", self.waiters)
         db_session = DBSession()
         session = self.validate_session_from_cookie(db_session=db_session)
         if session is None:
@@ -186,8 +212,8 @@ class GameStateHandler(WebSocketHandler):
     def on_close(self):
         logger.info("Closing websocket")
         if (
-                hasattr(self, 'session_id')
-                and self.session_id is not None
+            hasattr(self, 'session_id')
+            and self.session_id is not None
         ):
             self.clear_session(self.session_id)
         else:
