@@ -1,20 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: chameleon-redis
+  name: {{ .Release.Name }}-redis
 spec:
   selector:
     matchLabels:
-      app: chameleon-redis
+      app: {{ .Release.Name }}-redis
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: chameleon-redis
+        app: {{ .Release.Name }}-redis
     spec:
       containers:
-      - name: chameleon-redis
+      - name: {{ .Release.Name }}-redis
         image: redis:5
         imagePullPolicy: Always
         ports:
@@ -34,12 +34,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: chameleon-redis
+  name: {{ .Release.Name }}-redis
   labels:
-    app: chameleon-redis
+    app: {{ .Release.Name }}-redis
 spec:
   ports:
   - port: 6379
     protocol: TCP
   selector:
-    app: chameleon-redis
+    app: {{ .Release.Name }}-redis

@@ -6,3 +6,6 @@ data:
   DB_HOST: {{ .Release.Name }}-postgres
   DB_NAME: chameleon
   DB_PORT: {{ 5432 | quote }}
+  REDIS_HOST: {{ .Release.Name }}-redis
+  REDIS_PORT: {{ 6379 | quote }}
+  REDIS_MAIN_DB_NO: {{ 0 | quote }}
