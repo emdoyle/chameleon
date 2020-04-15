@@ -119,7 +119,7 @@ class GameStateHandler(WebSocketHandler):
         ready_states = r_pipe.execute()
         # This is sensitive to ordering... make sure pipelining preserves ordering
         result = {
-            session_id: ready_state
+            session_id: bool(ready_state)
             for ready_state, session_id in zip(ready_states, session_ids)
         }
         logger.debug("Ready states in game %s are:\n%s", game_id, result)
@@ -127,11 +127,10 @@ class GameStateHandler(WebSocketHandler):
 
     def connected_sessions_in_game(self, db_session: 'DBSession', game_id: int) -> Set[int]:
         db_session_ids = self._session_ids_for_game(db_session, game_id)
-        connected_session_ids = r.get(
+        connected_session_ids = r.smembers(
             f"{CONNECTED_SESSIONS_KEY}:{str(game_id)}"
         )
-        # TODO: how to be type safe with r.get?
-        result = db_session_ids.intersection(connected_session_ids)
+        result = db_session_ids.intersection({int(session_id) for session_id in connected_session_ids})
         logger.debug("Connected sessions in game %s are:\n%s", game_id, result)
         return result
 
@@ -281,10 +280,10 @@ class SessionAPIHandler(RequestHandler):
         session_id = self.get_secure_cookie(name="session_id")
         db_session = DBSession()
         if session_id:
-            GameStateHandler.clear_session(session_id=int(session_id))
-            logger.debug("Cleared session %s from websocket handler", session_id)
             session = db_session.query(Session).filter(Session.id == int(session_id)).first()
             if session:
+                GameStateHandler.clear_session(session_id=int(session_id), game_id=int(session.game_id))
+                logger.debug("Cleared session %s from websocket handler", session_id)
                 db_session.delete(session)
                 db_session.commit()
                 logger.debug("Removed session %s from the DB", session_id)

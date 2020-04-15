@@ -12,7 +12,9 @@ logger = logging.getLogger('chameleon')
 r = Redis(
     host=REDIS_HOST,
     port=int(REDIS_PORT),
-    db=int(REDIS_MAIN_DB_NO)
+    db=int(REDIS_MAIN_DB_NO),
+    charset='utf-8',
+    decode_responses=True,
 )
 
 

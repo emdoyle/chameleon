@@ -20,11 +20,11 @@ class VoteMessageHandler(BaseMessageHandler):
             for player in connected_players
         }
 
-    def _get_final_vote(self, votes: Dict[int, str]) -> Optional[str]:
+    def _get_final_vote(self, votes: Dict[str, str]) -> Optional[str]:
         counted_votes = Counter(votes.values())
         logger.debug("Counted votes: %s", counted_votes)
         if (
-            {str(key) for key in votes.keys()} == self.connected_sessions
+            {int(key) for key in votes.keys()} == self.connected_sessions
             and len(counted_votes) <= 2
             and (len(counted_votes) == 1 or any(count <= 1 for count in counted_votes.values()))
         ):
