@@ -21,7 +21,8 @@ from src.constants import (
     CARD_FILE_NAMES,
     GAME_TOPIC_KEY,
     READY_STATES_KEY,
-    RESTART_STATES_KEY
+    RESTART_STATES_KEY,
+    CONNECTED_SESSIONS_KEY
 )
 
 logger = logging.getLogger('chameleon')  # TODO: ENV
@@ -89,6 +90,11 @@ class GameStateHandler(WebSocketHandler):
 
     @staticmethod
     def send_outgoing_messages(outgoing_messages: 'OutgoingMessages'):
+        # This is how to publish to the game channel
+        # r.publish(
+        #     f"{GAME_TOPIC_KEY}:{str(game_id)}",
+        #     "Some message indicating default state should be re-sent"
+        # )
         for recipient, messages in outgoing_messages.messages.items():
             for outgoing_message in messages:
                 json_data = json_encode(outgoing_message.data)
@@ -121,18 +127,15 @@ class GameStateHandler(WebSocketHandler):
             for session_id in session_ids
         }
 
-    def connected_sessions_in_game(self, db_session: 'DBSession', game_id: int) -> Dict[int, 'GameStateHandler']:
-        session_ids = self._session_ids_for_game(db_session, game_id)
-        # this needs to look at Redis to figure out what sessions are actually listening to the game topic
-        # normally would just be creating a subscription and others wouldnt know
-        # but now others want a list of everyone subscribed
-        # redis natively will give the number of subscribers but no more info
-        # CONNECTED_SESSIONS_KEY:{game_id} @session_id = 'True'
-        # and cross-check with db sessions in game
+    def connected_sessions_in_game(self, db_session: 'DBSession', game_id: int) -> Set[int]:
+        db_session_ids = self._session_ids_for_game(db_session, game_id)
+        connected_session_ids = r.get(
+            f"{CONNECTED_SESSIONS_KEY}:{str(game_id)}"
+        )
         return {
-            key: value
-            for key, value in self.waiters.items()
-            if key in session_ids
+            session_id
+            for session_id in connected_session_ids
+            if session_id in db_session_ids
         }
 
     def check_origin(self, origin: str):
@@ -181,6 +184,11 @@ class GameStateHandler(WebSocketHandler):
 
         self.session_id = session.id
         GameStateHandler.waiters[self.session_id] = self
+        # This is an 'append' operation to the given key
+        r.lpush(
+            f"{CONNECTED_SESSIONS_KEY}:{session.game_id}",
+            str(session.id)
+        )
 
         # This kicks off the redis subscription coroutine within the main IOLoop
         IOLoop.current().spawn_callback(

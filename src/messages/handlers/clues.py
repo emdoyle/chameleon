@@ -22,8 +22,8 @@ class ClueMessageHandler(BaseMessageHandler):
         logger.debug("Clue phase clues are now: %s", clue_phase.clues)
         self.db_session.add(clue_phase)
 
-        logger.debug("Connected session keys: %s", self.connected_sessions.keys())
-        if {str(key) for key in clue_phase.clues.keys()} == {str(key) for key in self.connected_sessions.keys()}:
+        logger.debug("Connected session keys: %s", self.connected_sessions)
+        if {str(key) for key in clue_phase.clues.keys()} == self.connected_sessions:
             logger.debug("Everybody in game: %s has given a clue, moving to voting phase!", session.game_id)
             current_round = self._get_round(session.game_id)
             current_round.phase = 'vote'

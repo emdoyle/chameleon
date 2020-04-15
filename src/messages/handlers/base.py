@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Iterable, Optional, Type, TYPE_CHECKING
+from typing import Dict, Set, Iterable, Optional, Type, TYPE_CHECKING
 from sqlalchemy.sql.expression import false
 from src.db import (
     Session, Game, Round, SetUpPhase, CluePhase, RevealPhase, User
@@ -24,7 +24,7 @@ class AbstractMessageHandler(ABC):
             cls,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
-            connected_sessions: Dict[int, 'GameStateHandler'],
+            connected_sessions: Set[int],
             websocket_state: Type['GameStateHandler']
     ):
         ...
@@ -39,7 +39,7 @@ class BaseMessageHandler(AbstractMessageHandler):
             self,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
-            connected_sessions: Dict[int, 'GameStateHandler'],
+            connected_sessions: Set[int],
             websocket_state: Type['GameStateHandler']
     ):
         self.db_session = db_session
@@ -58,7 +58,7 @@ class BaseMessageHandler(AbstractMessageHandler):
             cls,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
-            connected_sessions: Dict[int, 'GameStateHandler'],
+            connected_sessions: Set[int],
             websocket_state: Type['GameStateHandler']
     ):
         return cls(
@@ -120,7 +120,7 @@ class BaseMessageHandler(AbstractMessageHandler):
         return self.db_session.query(Session).filter(Session.game_id == game_id).all()
 
     def _get_connected_players(self) -> Iterable['User']:
-        connected_session_ids = tuple(self.connected_sessions.keys())
+        connected_session_ids = tuple(self.connected_sessions)
         return self.db_session.query(User).join(Session, Session.user_id == User.id).filter(
             Session.id.in_(connected_session_ids)
         ).all()

@@ -13,7 +13,7 @@ from src.server import (
 from src.constants import (
     CARD_PATHS,
 )
-from src.key_value import AIORedisContainer
+from src.key_value import AIORedisContainer  # TODO: can pinject help here?
 
 
 def make_app():

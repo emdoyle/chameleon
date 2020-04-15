@@ -1,4 +1,4 @@
-from typing import Dict, Type, TYPE_CHECKING
+from typing import Dict, Set, Type, TYPE_CHECKING
 from src.messages.handlers import (
     PlayerMessageHandler,
     VoteMessageHandler,
@@ -32,7 +32,7 @@ class MessageDispatch:
             db_session: 'DBSession',
             session: 'Session',
             ready_states: Dict[int, bool],
-            connected_sessions: Dict[int, 'GameStateHandler'],
+            connected_sessions: Set[int],
             websocket_state: Type['GameStateHandler']
     ) -> 'OutgoingMessages':
         try:

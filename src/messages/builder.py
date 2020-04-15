@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Optional, Type, TYPE_CHECKING
+from typing import Dict, Set, List, Optional, Type, TYPE_CHECKING
 from sqlalchemy import func
 from sqlalchemy.sql.expression import false
 from src.db import (
@@ -28,7 +28,7 @@ class MessageBuilder:
             self,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
-            connected_sessions: Dict[int, 'GameStateHandler'],
+            connected_sessions: Set[int],
             websocket_state: Type['GameStateHandler']
     ):
         self.db_session = db_session
@@ -41,7 +41,7 @@ class MessageBuilder:
             cls,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
-            connected_sessions: Dict[int, 'GameStateHandler'],
+            connected_sessions: Set[int],
             websocket_state: Type['GameStateHandler']
     ):
         return cls(
