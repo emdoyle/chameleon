@@ -5,9 +5,11 @@ from src.db import (
     SetUpPhase,
     Round
 )
+from src.key_value import r  # TODO: should make all these handlers async... right?
 from src.categories import (
     CATEGORIES
 )
+from src.constants import READY_STATES_KEY
 from .base import BaseMessageHandler
 from ..data import OutgoingMessages
 
@@ -30,10 +32,13 @@ class ReadyMessageHandler(BaseMessageHandler):
             raise ValueError("Malformed message sent to ReadyMessageHandler")
 
         self.ready_states[session.id] = ready_state
-        # TODO: in-memory ready states are hard to deal with, just use DB
-        self.websocket_state.ready_states[session.id] = ready_state
+        r.hset(
+            f"{READY_STATES_KEY}:{str(session.game_id)}",
+            str(session.id),
+            str(ready_state)
+        )
         logger.debug('Ready states: %s', self.ready_states)
-        filter_self = True
+        filter_self = True  # TODO: this is some weird stuff
 
         if all((value for key, value in self.ready_states.items())):
             self._handle_full_ready(session.game_id)

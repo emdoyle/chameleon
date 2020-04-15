@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Set, Iterable, Optional, Type, TYPE_CHECKING
+from typing import Dict, Set, Iterable, Optional, TYPE_CHECKING
 from sqlalchemy.sql.expression import false
 from src.db import (
     Session, Game, Round, SetUpPhase, CluePhase, RevealPhase, User
@@ -9,7 +9,6 @@ from src.messages.builder import MessageBuilder
 from ..data import OutgoingMessages
 
 if TYPE_CHECKING:
-    from src.server import GameStateHandler
     from src.db import (
         DBSession
     )
@@ -25,7 +24,6 @@ class AbstractMessageHandler(ABC):
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
             connected_sessions: Set[int],
-            websocket_state: Type['GameStateHandler']
     ):
         ...
 
@@ -40,17 +38,14 @@ class BaseMessageHandler(AbstractMessageHandler):
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
             connected_sessions: Set[int],
-            websocket_state: Type['GameStateHandler']
     ):
         self.db_session = db_session
         self.ready_states = ready_states
         self.connected_sessions = connected_sessions
-        self.websocket_state = websocket_state
         self.message_builder = MessageBuilder.factory(
             db_session=db_session,
             ready_states=ready_states,
             connected_sessions=connected_sessions,
-            websocket_state=websocket_state
         )
 
     @classmethod
@@ -59,13 +54,11 @@ class BaseMessageHandler(AbstractMessageHandler):
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
             connected_sessions: Set[int],
-            websocket_state: Type['GameStateHandler']
     ):
         return cls(
             db_session=db_session,
             ready_states=ready_states,
             connected_sessions=connected_sessions,
-            websocket_state=websocket_state
         )
 
     def _get_username_for_session_id(self, session_id: int) -> str:
