@@ -24,6 +24,7 @@ class AbstractMessageHandler(ABC):
             cls,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
+            restart_states: Dict[int, bool],
             connected_sessions: Set[int],
     ):
         ...
@@ -38,10 +39,12 @@ class BaseMessageHandler(AbstractMessageHandler):
             self,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
+            restart_states: Dict[int, bool],
             connected_sessions: Set[int],
     ):
         self.db_session = db_session
         self.ready_states = ready_states
+        self.restart_states = restart_states
         self.connected_sessions = connected_sessions
         self.message_builder = MessageBuilder.factory(
             db_session=db_session,
@@ -54,11 +57,13 @@ class BaseMessageHandler(AbstractMessageHandler):
             cls,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
+            restart_states: Dict[int, bool],
             connected_sessions: Set[int],
     ):
         return cls(
             db_session=db_session,
             ready_states=ready_states,
+            restart_states=restart_states,
             connected_sessions=connected_sessions,
         )
 
