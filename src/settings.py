@@ -5,7 +5,7 @@ from environs import Env
 env = Env()
 env.read_env()
 
-PORT = env("CHAMELEON_PORT", "8888")
+PORT = env("SERVER_PORT", "8888")
 
 BUILD_PATH = env("BUILD_PATH", "assets/build/")
 

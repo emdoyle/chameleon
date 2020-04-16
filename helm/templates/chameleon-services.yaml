@@ -16,7 +16,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Release.Name }}-lb
-  label:
+  labels:
     developer: {{ .Values.developer | default "emdoyle" | lower | quote }}
 spec:
   type: LoadBalancer
