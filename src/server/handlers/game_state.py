@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Set
+from typing import Optional, Dict, Set, TYPE_CHECKING
 from urllib.parse import urlparse
 from redis.exceptions import RedisError  # TODO: wrap these errors?
 from tornado.ioloop import IOLoop
@@ -21,20 +21,28 @@ from src.constants import (
     CONNECTED_SESSIONS_KEY
 )
 
+if TYPE_CHECKING:
+    from aioredis.pubsub import Channel
+
 logger = logging.getLogger(LOGGER_NAME)
 
 
 class GameStateHandler(WebSocketHandler):
     waiters = {}
 
-    @staticmethod
-    def send_outgoing_messages(outgoing_messages: 'OutgoingMessages'):
-        # This is how to publish to the game channel
-        # r.publish(
-        #     f"{GAME_TOPIC_KEY}:{str(game_id)}",
-        #     "Some message indicating default state should be re-sent"
-        # )
+    @classmethod
+    def publish_messages_for_game(cls, outgoing_messages: 'OutgoingMessages', game_id: int) -> None:
+        r.publish(
+            f"{GAME_TOPIC_KEY}:{str(game_id)}",
+            outgoing_messages.serialize_as_json()
+        )
+
+    @classmethod
+    def send_outgoing_messages(cls, outgoing_messages: 'OutgoingMessages'):
+        # TODO: if write_message blocks, should do all this concurrently
         for recipient, messages in outgoing_messages.messages.items():
+            if recipient not in cls.waiters:
+                continue
             for outgoing_message in messages:
                 json_data = json_encode(outgoing_message.data)
                 logger.info("Writing message (%s)\nTo recipient %s", json_data, recipient)
@@ -97,10 +105,15 @@ class GameStateHandler(WebSocketHandler):
             return None
         return current_session
 
-    async def _read_messages_from_channel(self, channel):
+    async def _read_messages_from_channel(self, channel: 'Channel'):
         while await channel.wait_message():
             msg = await channel.get()
-            logger.info("Message: %s", msg)
+            logger.info("Message: %s received on channel: %s", msg, channel.name)
+            try:
+                outgoing_messages = OutgoingMessages.deserialize_from_json(serialized_messages=msg)
+                self.send_outgoing_messages(outgoing_messages=outgoing_messages)
+            except TypeError:
+                logger.exception("Received message but could not deserialize it!")
 
     async def accept_from_redis_topic(self, game_id: int):
         aio_r = AIORedisContainer.get_client()
@@ -117,7 +130,6 @@ class GameStateHandler(WebSocketHandler):
 
         self.session_id = session.id
         GameStateHandler.waiters[self.session_id] = self
-        # This adds to a Set in Redis
         r.sadd(
             f"{CONNECTED_SESSIONS_KEY}:{session.game_id}",
             str(session.id)
@@ -144,7 +156,11 @@ class GameStateHandler(WebSocketHandler):
             ready_states=self.ready_states_for_game(db_session, session.game_id),
             connected_sessions=self.connected_sessions_in_game(db_session, session.game_id),
         )
-        GameStateHandler.send_outgoing_messages(outgoing_messages=outgoing_messages)
+        if session.game_id is None:
+            logger.warning("No game id provided to send outgoing messages, cannot publish to channel")
+        else:
+            self.publish_messages_for_game(outgoing_messages=outgoing_messages, game_id=session.game_id)
+        self.send_outgoing_messages(outgoing_messages=outgoing_messages)
         db_session.close()
 
     def on_close(self):

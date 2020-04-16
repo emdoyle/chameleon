@@ -1,6 +1,7 @@
 import attr
 from typing import Dict, List
 from copy import deepcopy
+from json import loads, dumps
 
 
 @attr.s(slots=True)
@@ -32,3 +33,11 @@ class OutgoingMessages:
         return OutgoingMessages(
             messages=merged_messages
         )
+
+    # TODO: could really go crazy with abstractions here... not necessary now
+    def serialize_as_json(self) -> str:
+        return dumps(attr.asdict(self))
+
+    @classmethod
+    def deserialize_from_json(cls, serialized_messages: str) -> 'OutgoingMessages':
+        return cls(**loads(serialized_messages))
