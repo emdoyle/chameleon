@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Set, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from urllib.parse import urlparse
 from redis.exceptions import RedisError  # TODO: wrap these errors?
 from tornado.ioloop import IOLoop
@@ -7,7 +7,6 @@ from tornado.websocket import WebSocketHandler
 from tornado.escape import json_decode, json_encode
 from src.db import (
     DBSession,
-    Game,
     Session,
 )
 from src.key_value import r, AIORedisContainer
@@ -50,36 +49,6 @@ class GameStateHandler(WebSocketHandler):
                     GameStateHandler.waiters[recipient].write_message(json_encode(outgoing_message.data))
                 except KeyError:
                     logger.warning("Recipient %s is not attached to websocket", recipient)
-
-    @classmethod
-    def _session_ids_for_game(cls, db_session: 'DBSession', game_id: int) -> Set[int]:
-        sessions_in_game = db_session.query(Session).join(Game, Game.id == Session.game_id).filter(
-            Game.id == game_id
-        ).all()
-        return {session.id for session in sessions_in_game}
-
-    def ready_states_for_game(self, db_session: 'DBSession', game_id: int) -> Dict[int, bool]:
-        session_ids = self._session_ids_for_game(db_session, game_id)
-        r_pipe = r.pipeline()
-        for session_id in session_ids:
-            r_pipe.hget(f"{READY_STATES_KEY}:{str(game_id)}", str(session_id))
-        ready_states = r_pipe.execute()
-        # This is sensitive to ordering... make sure pipelining preserves ordering
-        result = {
-            session_id: bool(ready_state)
-            for ready_state, session_id in zip(ready_states, session_ids)
-        }
-        logger.debug("Ready states in game %s are:\n%s", game_id, result)
-        return result
-
-    def connected_sessions_in_game(self, db_session: 'DBSession', game_id: int) -> Set[int]:
-        db_session_ids = self._session_ids_for_game(db_session, game_id)
-        connected_session_ids = r.smembers(
-            f"{CONNECTED_SESSIONS_KEY}:{str(game_id)}"
-        )
-        result = db_session_ids.intersection({int(session_id) for session_id in connected_session_ids})
-        logger.debug("Connected sessions in game %s are:\n%s", game_id, result)
-        return result
 
     def check_origin(self, origin: str):
         parsed = urlparse(origin)
@@ -147,19 +116,20 @@ class GameStateHandler(WebSocketHandler):
         db_session = DBSession()
         session = self.validate_session_from_cookie(db_session=db_session)
         if session is None:
+            logger.error("No valid session found!")
+            return
+        if session.game_id is None:
+            logger.error("No game id attached to session!")
             return
 
-        outgoing_messages = MessageDispatch.handle(
-            message=json_decode(message),
+        outgoing_messages = MessageDispatch.factory(
             db_session=db_session,
+            game_id=session.game_id
+        ).handle(
+            message=json_decode(message),
             session=session,
-            ready_states=self.ready_states_for_game(db_session, session.game_id),
-            connected_sessions=self.connected_sessions_in_game(db_session, session.game_id),
         )
-        if session.game_id is None:
-            logger.warning("No game id provided to send outgoing messages, cannot publish to channel")
-        else:
-            self.publish_messages_for_game(outgoing_messages=outgoing_messages, game_id=session.game_id)
+        self.publish_messages_for_game(outgoing_messages=outgoing_messages, game_id=session.game_id)
         self.send_outgoing_messages(outgoing_messages=outgoing_messages)
         db_session.close()
 
