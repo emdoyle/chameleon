@@ -1,9 +1,6 @@
 import attr
-import logging
 from typing import Dict, List
 from copy import deepcopy
-
-logger = logging.getLogger('chameleon')
 
 
 @attr.s(slots=True)

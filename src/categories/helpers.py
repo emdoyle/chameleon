@@ -1,8 +1,9 @@
 import logging
 from typing import Optional
+from src.settings import LOGGER_NAME
 from .root import CATEGORIES, KEYCARD
 
-logger = logging.getLogger('chameleon')
+logger = logging.getLogger(LOGGER_NAME)
 
 
 def decode(category: str, big_die_roll: int, small_die_roll: int) -> Optional[str]:

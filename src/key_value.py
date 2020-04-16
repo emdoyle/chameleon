@@ -5,9 +5,10 @@ from src.settings import (
     REDIS_HOST,
     REDIS_PORT,
     REDIS_MAIN_DB_NO,
+    LOGGER_NAME
 )
 
-logger = logging.getLogger('chameleon')
+logger = logging.getLogger(LOGGER_NAME)
 
 r = Redis(
     host=REDIS_HOST,

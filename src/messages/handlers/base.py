@@ -6,6 +6,7 @@ from src.db import (
     Session, Game, Round, SetUpPhase, CluePhase, RevealPhase, User
 )
 from src.messages.builder import MessageBuilder
+from src.settings import LOGGER_NAME
 from ..data import OutgoingMessages
 
 if TYPE_CHECKING:
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
         DBSession
     )
 
-logger = logging.getLogger('chameleon')
+logger = logging.getLogger(LOGGER_NAME)
 
 
 class AbstractMessageHandler(ABC):

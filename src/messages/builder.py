@@ -9,6 +9,7 @@ from src.db import (
     Session
 )
 from src.categories import decode
+from src.settings import LOGGER_NAME
 from .data import OutgoingMessage
 
 if TYPE_CHECKING:
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
         SetUpPhase
     )
 
-logger = logging.getLogger('chameleon')
+logger = logging.getLogger(LOGGER_NAME)
 
 
 class MessageBuilder:

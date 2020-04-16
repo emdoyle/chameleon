@@ -10,6 +10,7 @@ from src.categories import (
     CATEGORIES
 )
 from src.constants import READY_STATES_KEY
+from src.settings import LOGGER_NAME
 from .base import BaseMessageHandler
 from ..data import OutgoingMessages
 
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
         Session
     )
 
-logger = logging.getLogger('chameleon')
+logger = logging.getLogger(LOGGER_NAME)
 
 
 class ReadyMessageHandler(BaseMessageHandler):

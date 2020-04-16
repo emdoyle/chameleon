@@ -1,6 +1,6 @@
 import tornado.ioloop
 import tornado.web
-from src.settings import COOKIE_SECRET
+from src.settings import BUILD_PATH, PORT, COOKIE_SECRET
 from src.server import (
     GameStateHandler,
     SessionAPIHandler,
@@ -22,15 +22,15 @@ def make_app():
         (r"/api/v1/session", SessionAPIHandler),
         (r"/api/v1/user", UserAPIHandler),
         (r"/api/v1/games", GameAPIHandler),
-        (CARD_PATHS, KeycardHandler, {'path': "assets/build/"}),
-        (r"/assets/build/(.*)", PublicAssetHandler, {'path': "assets/build/"}),
-        (r"/(.*)", RootHandler, {'path': "assets/build/"}),  # TODO: ENV
+        (CARD_PATHS, KeycardHandler, {'path': BUILD_PATH}),
+        (r"/{}(.*)".format(BUILD_PATH), PublicAssetHandler, {'path': BUILD_PATH}),
+        (r"/(.*)", RootHandler, {'path': BUILD_PATH}),
     ], cookie_secret=COOKIE_SECRET)
 
 
 if __name__ == '__main__':
     app = make_app()
-    app.listen(8888)  # TODO: ENV
+    app.listen(int(PORT))
     io_loop = tornado.ioloop.IOLoop.current()
     io_loop.run_sync(AIORedisContainer.set_client)
     io_loop.start()

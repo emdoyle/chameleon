@@ -1,3 +1,4 @@
+KEYCARD_FILE_NAME = "keycard.jpeg"
 CARD_FILE_NAMES = [
     r"small_die.svg",
     r"keycard.jpeg",

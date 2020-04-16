@@ -1,5 +1,6 @@
 import logging
 from typing import Dict, TYPE_CHECKING
+from src.settings import LOGGER_NAME
 from .base import BaseMessageHandler
 
 if TYPE_CHECKING:
@@ -8,7 +9,7 @@ if TYPE_CHECKING:
     )
     from ..data import OutgoingMessages
 
-logger = logging.getLogger('chameleon')
+logger = logging.getLogger(LOGGER_NAME)
 
 
 class ClueMessageHandler(BaseMessageHandler):

@@ -1,7 +1,18 @@
+import logging
+import sys
 from environs import Env
 
 env = Env()
 env.read_env()
+
+PORT = env("CHAMELEON_PORT", "8888")
+
+BUILD_PATH = "assets/build/"
+
+LOGGER_NAME = env("LOGGER_NAME", "chameleon")
+logger = logging.getLogger(LOGGER_NAME)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+logger.setLevel(logging.DEBUG)
 
 DB_HOST = env("DB_HOST", "localhost")
 DB_PORT = env("DB_PORT", "5432")
