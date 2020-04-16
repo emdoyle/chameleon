@@ -7,7 +7,7 @@ env.read_env()
 
 PORT = env("CHAMELEON_PORT", "8888")
 
-BUILD_PATH = "assets/build/"
+BUILD_PATH = env("BUILD_PATH", "assets/build/")
 
 LOGGER_NAME = env("LOGGER_NAME", "chameleon")
 logger = logging.getLogger(LOGGER_NAME)
