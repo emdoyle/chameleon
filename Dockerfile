@@ -20,5 +20,6 @@ RUN pip install -r requirements.txt
 RUN mkdir src
 COPY src/ ./src/
 COPY alembic.ini .
+COPY scripts/wait-for-it.sh .
 ENV PYTHONPATH=.
 CMD ["python", "src/main.py"]

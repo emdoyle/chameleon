@@ -1,0 +1,24 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./assets/build:/root/assets/build
+    environment:
+      COOKIE_SECRET: "${COOKIE_SECRET}"
+      DB_HOST: postgres
+      DB_USER: postgres
+      DB_PASSWORD: "${POSTGRES_PASSWORD}"
+      REDIS_HOST: redis
+    depends_on:
+      - "redis"
+      - "postgres"
+    command: ["./wait-for-it.sh", "postgres:5432", "--", "./wait-for-it.sh", "redis:6379", "--", "python", "src/main.py"]
+  redis:
+    image: "redis:5"
+  postgres:
+    image: "postgres:11"
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
