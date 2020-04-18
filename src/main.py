@@ -14,6 +14,7 @@ from src.constants import (
     CARD_PATHS,
 )
 from src.key_value import AIORedisContainer  # TODO: can pinject help here?
+from src.db import init_db
 
 
 def make_app():
@@ -29,6 +30,7 @@ def make_app():
 
 
 if __name__ == '__main__':
+    init_db()
     app = make_app()
     app.listen(int(PORT))
     io_loop = tornado.ioloop.IOLoop.current()

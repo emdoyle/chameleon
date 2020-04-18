@@ -92,3 +92,7 @@ class RevealPhase(Base):
     id = Column(Integer, primary_key=True)
     round_id = Column(Integer, ForeignKey('rounds.id'))
     guess = Column(String)
+
+
+def init_db():
+    Base.metadata.create_all(Engine)
