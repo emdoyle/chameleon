@@ -96,7 +96,7 @@ class MessageDispatch:
         restart_states = r_pipe.execute()
         # This is sensitive to ordering... make sure pipelining preserves ordering
         result = {
-            session_id: bool(restart_state)
+            session_id: restart_state == 'true'
             for restart_state, session_id in zip(restart_states, session_ids)
         }
         logger.debug("Restart states in game %s are:\n%s", game_id, result)

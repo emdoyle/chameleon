@@ -8,6 +8,7 @@ import ReadyInput from "./ReadyInput";
 import ClueInput from "./ClueInput";
 import GuessInput from "./GuessInput";
 import VoteInput from "./VoteInput";
+import RestartInput from "./RestartInput";
 import PlayersTable from "./PlayersTable";
 import CardModal from "./CardModal";
 import CategoryCard from "./CategoryCard";
@@ -84,6 +85,7 @@ export default function PlayingChameleon() {
     const [players, setPlayers] = React.useState([]);
     const [clues, setClues] = React.useState({});
     const [votes, setVotes] = React.useState({});
+    const [restart, setRestart] = React.useState(false);
     const [showModalButton, setShowModalButton] = React.useState(false);
     const [showModal, setShowModal] = React.useState(false);
     const [showWinnerModal, setShowWinnerModal] = React.useState(false);
@@ -225,6 +227,20 @@ export default function PlayingChameleon() {
                 />
             )
         }
+        if (phase === 'reveal' && Boolean(winner)) {
+            return (
+                <RestartInput
+                    value={restart}
+                    onChange={(event) => {
+                        setRestart(event.target.checked);
+                        websocket.send(JSON.stringify({
+                            kind: 'restart',
+                            restart: event.target.checked
+                        }))
+                    }}
+                />
+            )
+        }
         if (phase === 'reveal') {
             return (
                 <GuessInput
@@ -258,6 +274,7 @@ export default function PlayingChameleon() {
                                     <PlayersTable
                                         players={players}
                                         showReady={phase === 'set_up'}
+                                        showRestart={Boolean(winner)}
                                         clues={clues}
                                         votes={votes}
                                     />

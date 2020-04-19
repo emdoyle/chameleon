@@ -28,10 +28,12 @@ class MessageBuilder:
             self,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
+            restart_states: Dict[int, bool],
             connected_sessions: Set[int]
     ):
         self.db_session = db_session
         self.ready_states = ready_states
+        self.restart_states = restart_states
         self.connected_sessions = connected_sessions
 
     @classmethod
@@ -39,11 +41,13 @@ class MessageBuilder:
             cls,
             db_session: 'DBSession',
             ready_states: Dict[int, bool],
+            restart_states: Dict[int, bool],
             connected_sessions: Set[int]
     ):
         return cls(
             db_session=db_session,
             ready_states=ready_states,
+            restart_states=restart_states,
             connected_sessions=connected_sessions,
         )
 
@@ -121,7 +125,8 @@ class MessageBuilder:
                 'id': player.id,
                 'session_id': session_id,
                 'username': player.username,
-                'ready': self.ready_states[session_id]
+                'ready': self.ready_states[session_id],
+                'restart': self.restart_states[session_id]
             }
             result['players'].append(entry)
         return result

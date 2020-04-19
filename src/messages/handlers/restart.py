@@ -1,7 +1,8 @@
 import logging
-from typing import Dict, TYPE_CHECKING
+from typing import Dict
 from sqlalchemy.sql.expression import false
 from src.db import (
+    Session,
     Game,
     Round,
     SetUpPhase,
@@ -14,11 +15,6 @@ from src.constants import RESTART_STATES_KEY
 from src.settings import LOGGER_NAME
 from .base import BaseMessageHandler
 from ..data import OutgoingMessages
-
-if TYPE_CHECKING:
-    from src.db import (
-        Session
-    )
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -53,11 +49,15 @@ class RestartMessageHandler(BaseMessageHandler):
         )
 
     def _handle_full_restart(self, session_id: int, game_id: int) -> None:
-        game = self.db_session.query(Game, Game.id == game_id).first()
-        current_round = self.db_session.query(Round, Round.game_id == game_id).filter(
+        game = self.db_session.query(Game).filter(Game.id == game_id).first()
+        current_round = self.db_session.query(Round).filter(
+            Round.game_id == game_id
+        ).filter(
             Round.completed == false()
         ).first()
-        current_round.completed = False
+        current_round.completed = True
+        # also clear out redis state for game... or should we just be using the round id?
+        # round_id
         self.db_session.add(current_round)
         self.db_session.commit()
 

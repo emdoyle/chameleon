@@ -19,6 +19,7 @@ export default function PlayersTable(props) {
                 <TableHead>
                     <TableCell>User</TableCell>
                     {props.showReady && (<TableCell>Ready?</TableCell>)}
+                    {props.showRestart && (<TableCell>Restart?</TableCell>)}
                     <TableCell>Clue given</TableCell>
                     <TableCell>Vote</TableCell>
                 </TableHead>
@@ -29,6 +30,11 @@ export default function PlayersTable(props) {
                             {props.showReady && (
                                 <TableCell style={{width: '20%'}}>{
                                     player.ready ? "Ready" : "Not ready"
+                                }</TableCell>
+                            )}
+                            {props.showRestart && (
+                                <TableCell style={{width: '20%'}}>{
+                                    player.restart ? "Playing again!" : "Undecided"
                                 }</TableCell>
                             )}
                             <TableCell style={{width: '50%'}}>{clues[player.id] || '...'}</TableCell>

@@ -49,6 +49,7 @@ class BaseMessageHandler(AbstractMessageHandler):
         self.message_builder = MessageBuilder.factory(
             db_session=db_session,
             ready_states=ready_states,
+            restart_states=restart_states,
             connected_sessions=connected_sessions,
         )
 
