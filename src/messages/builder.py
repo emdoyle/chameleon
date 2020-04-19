@@ -27,28 +27,20 @@ class MessageBuilder:
     def __init__(
             self,
             db_session: 'DBSession',
-            ready_states: Dict[int, bool],
-            restart_states: Dict[int, bool],
-            connected_sessions: Set[int]
+            game_id: int
     ):
         self.db_session = db_session
-        self.ready_states = ready_states
-        self.restart_states = restart_states
-        self.connected_sessions = connected_sessions
+        self.game_id = game_id
 
     @classmethod
     def factory(
             cls,
             db_session: 'DBSession',
-            ready_states: Dict[int, bool],
-            restart_states: Dict[int, bool],
-            connected_sessions: Set[int]
+            game_id: int
     ):
         return cls(
             db_session=db_session,
-            ready_states=ready_states,
-            restart_states=restart_states,
-            connected_sessions=connected_sessions,
+            game_id=game_id
         )
 
     @classmethod
@@ -114,19 +106,22 @@ class MessageBuilder:
     def _build_players_dict(
             self,
             players: List['User'],
+            connected_sessions: Set[int],
+            ready_states: Dict[int, bool],
+            restart_states: Dict[int, bool]
     ) -> Dict:
         result = {'players': []}
         for player in players:
             session_id = player.session.id
-            if session_id not in self.connected_sessions:
+            if session_id not in connected_sessions:
                 logger.error("Session %s has disconnected from the game!", player.id)
                 continue
             entry = {
                 'id': player.id,
                 'session_id': session_id,
                 'username': player.username,
-                'ready': self.ready_states[session_id],
-                'restart': self.restart_states[session_id]
+                'ready': ready_states[session_id],
+                'restart': restart_states[session_id]
             }
             result['players'].append(entry)
         return result
@@ -134,6 +129,9 @@ class MessageBuilder:
     def create_full_game_state_message(
             self,
             game_id: int,
+            connected_sessions: Set[int],
+            ready_states: Dict[int, bool],
+            restart_states: Dict[int, bool]
     ) -> 'OutgoingMessage':
         first_uncompleted_round = self.db_session.query(Round).filter(
             Round.game_id == game_id
@@ -157,6 +155,9 @@ class MessageBuilder:
 
         players_dict = self._build_players_dict(
             players=players_in_game.all(),
+            connected_sessions=connected_sessions,
+            ready_states=ready_states,
+            restart_states=restart_states
         )
 
         return OutgoingMessage(

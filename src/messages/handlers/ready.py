@@ -1,15 +1,15 @@
 import random
 import logging
 from typing import Dict, Tuple, Set, List, TYPE_CHECKING
+from sqlalchemy.sql.expression import false
+from src.services.game_state import GameStateService
 from src.db import (
     SetUpPhase,
     Round
 )
-from src.key_value import r  # TODO: should make all these handlers async... right?
 from src.categories import (
     CATEGORIES
 )
-from src.constants import READY_STATES_KEY
 from src.settings import LOGGER_NAME
 from .base import BaseMessageHandler
 from ..data import OutgoingMessages
@@ -32,16 +32,14 @@ class ReadyMessageHandler(BaseMessageHandler):
         except KeyError:
             raise ValueError("Malformed message sent to ReadyMessageHandler")
 
-        self.ready_states[session.id] = ready_state
-        r.hset(
-            f"{READY_STATES_KEY}:{str(session.game_id)}",
-            str(session.id),
-            str(ready_state)
-        )
-        logger.debug('Ready states: %s', self.ready_states)
+        game_state_service = GameStateService(db_session=self.db_session)
+
+        game_state_service.set_ready_state(session.id, session.game_id, ready_state)
+        ready_states = game_state_service.ready_states_for_game(session.game_id)
+        logger.debug('Ready states: %s', ready_states)
         filter_self = True  # TODO: this is some weird stuff
 
-        if all((value for key, value in self.ready_states.items())):
+        if all((value for key, value in ready_states.items())):
             self._handle_full_ready(session.game_id)
             filter_self = False
 
@@ -61,6 +59,8 @@ class ReadyMessageHandler(BaseMessageHandler):
             Round, SetUpPhase.round_id == Round.id
         ).filter(
             Round.game_id == game_id
+        ).filter(
+            Round.completed == false()
         ).first()
         if set_up_phase is None:
             raise ValueError("Could not find game to send full ready message!")

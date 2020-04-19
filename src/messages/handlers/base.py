@@ -2,6 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, Set, Iterable, Optional, TYPE_CHECKING
 from sqlalchemy.sql.expression import false
+from src.services.game_state import GameStateService
 from src.db import (
     Session, Game, Round, SetUpPhase, CluePhase, RevealPhase, User
 )
@@ -20,13 +21,7 @@ logger = logging.getLogger(LOGGER_NAME)
 class AbstractMessageHandler(ABC):
     @classmethod
     @abstractmethod
-    def factory(
-            cls,
-            db_session: 'DBSession',
-            ready_states: Dict[int, bool],
-            restart_states: Dict[int, bool],
-            connected_sessions: Set[int],
-    ):
+    def factory(cls, *args, **kwargs):
         ...
 
     @abstractmethod
@@ -38,34 +33,24 @@ class BaseMessageHandler(AbstractMessageHandler):
     def __init__(
             self,
             db_session: 'DBSession',
-            ready_states: Dict[int, bool],
-            restart_states: Dict[int, bool],
-            connected_sessions: Set[int],
+            game_id: int
     ):
         self.db_session = db_session
-        self.ready_states = ready_states
-        self.restart_states = restart_states
-        self.connected_sessions = connected_sessions
+        self.game_id = game_id
         self.message_builder = MessageBuilder.factory(
             db_session=db_session,
-            ready_states=ready_states,
-            restart_states=restart_states,
-            connected_sessions=connected_sessions,
+            game_id=game_id
         )
 
     @classmethod
     def factory(
             cls,
             db_session: 'DBSession',
-            ready_states: Dict[int, bool],
-            restart_states: Dict[int, bool],
-            connected_sessions: Set[int],
+            game_id: int
     ):
         return cls(
             db_session=db_session,
-            ready_states=ready_states,
-            restart_states=restart_states,
-            connected_sessions=connected_sessions,
+            game_id=game_id
         )
 
     def _get_username_for_session_id(self, session_id: int) -> str:
@@ -119,8 +104,13 @@ class BaseMessageHandler(AbstractMessageHandler):
     def _get_sessions_in_game(self, game_id: int) -> Iterable['Session']:
         return self.db_session.query(Session).filter(Session.game_id == game_id).all()
 
-    def _get_connected_players(self) -> Iterable['User']:
-        connected_session_ids = tuple(self.connected_sessions)
+    def _get_connected_sessions(self, game_id: int) -> Set[int]:
+        game_state_service = GameStateService(db_session=self.db_session)
+        return game_state_service.connected_sessions_in_game(game_id=game_id)
+
+    def _get_connected_players(self, game_id: int) -> Iterable['User']:
+        connected_sessions = self._get_connected_sessions(game_id=game_id)
+        connected_session_ids = tuple(connected_sessions)
         return self.db_session.query(User).join(Session, Session.user_id == User.id).filter(
             Session.id.in_(connected_session_ids)
         ).all()
@@ -132,7 +122,7 @@ class BaseMessageHandler(AbstractMessageHandler):
             return None
         return set_up_phase.chameleon_session_id
 
-    def _get_clue_turn_session_id(self, game_id: int) -> Optional[int]:
+    def _get_clue_turn_session_id(self, game_id: int, connected_sessions: Set[int]) -> Optional[int]:
         current_round = self._get_round(game_id=game_id)
         if current_round.phase != 'clue':
             logger.debug("Nobody's turn to give clues right now")
@@ -146,7 +136,7 @@ class BaseMessageHandler(AbstractMessageHandler):
         return next((
             session_id
             for session_id in session_ordering
-            if str(session_id) not in clue_phase.clues and session_id in self.connected_sessions
+            if str(session_id) not in clue_phase.clues and session_id in connected_sessions
         ), None)
 
     def _update_game_ending(self, game_id: int, winner: str) -> None:
@@ -156,11 +146,18 @@ class BaseMessageHandler(AbstractMessageHandler):
         self.db_session.commit()  # TODO: already in weird territory when it comes to committing unexpectedly
 
     def _default_messages(self, game_id: int, session_id: int, filter_self: bool = True) -> 'OutgoingMessages':
+        game_state_service = GameStateService(db_session=self.db_session)
+        connected_sessions = game_state_service.connected_sessions_in_game(game_id=game_id)
+        ready_states = game_state_service.ready_states_for_game(game_id=game_id)
+        restart_states = game_state_service.restart_states_for_game(game_id=game_id)
         sessions_in_game = self._get_sessions_in_game(game_id)
         chameleon_session_id = self._get_chameleon_session_id(game_id)
-        clue_turn_session_id = self._get_clue_turn_session_id(game_id)
+        clue_turn_session_id = self._get_clue_turn_session_id(game_id, connected_sessions)
         full_game_state_message = self.message_builder.create_full_game_state_message(
-            game_id=game_id
+            game_id=game_id,
+            connected_sessions=connected_sessions,
+            ready_states=ready_states,
+            restart_states=restart_states
         )  # inefficient
 
         messages = {}

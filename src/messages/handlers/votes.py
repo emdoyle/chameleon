@@ -14,18 +14,18 @@ logger = logging.getLogger(LOGGER_NAME)
 
 
 class VoteMessageHandler(BaseMessageHandler):
-    def _validate_vote(self, vote: str) -> bool:
-        connected_players = self._get_connected_players()
+    def _validate_vote(self, vote: str, game_id: int) -> bool:
+        connected_players = self._get_connected_players(game_id)
         return vote in {
             player.username
             for player in connected_players
         }
 
-    def _get_final_vote(self, votes: Dict[str, str]) -> Optional[str]:
+    def _get_final_vote(self, votes: Dict[str, str], game_id: int) -> Optional[str]:
         counted_votes = Counter(votes.values())
         logger.debug("Counted votes: %s", counted_votes)
         if (
-            {int(key) for key in votes.keys()} == self.connected_sessions
+            {int(key) for key in votes.keys()} == self._get_connected_sessions(game_id=game_id)
             and len(counted_votes) <= 2
             and (len(counted_votes) == 1 or any(count <= 1 for count in counted_votes.values()))
         ):
@@ -45,7 +45,7 @@ class VoteMessageHandler(BaseMessageHandler):
         else:
             vote_phase.votes = {**vote_phase.votes, str(session.id): vote}
 
-        vote_phase.final_vote = self._get_final_vote(vote_phase.votes)
+        vote_phase.final_vote = self._get_final_vote(vote_phase.votes, session.game_id)
         self.db_session.add(vote_phase)
         if vote_phase.final_vote is not None:
             current_round.phase = 'reveal'
@@ -69,7 +69,7 @@ class VoteMessageHandler(BaseMessageHandler):
                 vote = message['vote']
             except KeyError:
                 raise ValueError("A 'set' action vote message requires a 'vote' key")
-            if self._validate_vote(vote):
+            if self._validate_vote(vote, session.game_id):
                 self._update_game_state(session, vote)
         elif action == 'clear':
             self._update_game_state(session, None)

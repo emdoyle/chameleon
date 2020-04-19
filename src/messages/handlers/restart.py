@@ -1,17 +1,9 @@
 import logging
 from typing import Dict
-from sqlalchemy.sql.expression import false
 from src.db import (
     Session,
-    Game,
-    Round,
-    SetUpPhase,
-    CluePhase,
-    VotePhase,
-    RevealPhase
 )
-from src.key_value import r  # TODO: should make all these handlers async... right?
-from src.constants import RESTART_STATES_KEY
+from src.services.game_state import GameStateService
 from src.settings import LOGGER_NAME
 from .base import BaseMessageHandler
 from ..data import OutgoingMessages
@@ -29,17 +21,16 @@ class RestartMessageHandler(BaseMessageHandler):
         except KeyError:
             raise ValueError("Malformed message sent to ReadyMessageHandler")
 
-        self.restart_states[session.id] = restart_state
-        r.hset(
-            f"{RESTART_STATES_KEY}:{str(session.game_id)}",
-            str(session.id),
-            str(restart_state)
+        game_state_service = GameStateService(db_session=self.db_session)
+        game_state_service.set_restart_state(
+            session_id=session.id, game_id=session.game_id, restart_state=restart_state
         )
-        logger.debug('Restart states: %s', self.restart_states)
+        restart_states = game_state_service.restart_states_for_game(game_id=session.game_id)
+        logger.debug('Restart states: %s', restart_states)
         filter_self = True  # TODO: this is some weird stuff
 
-        if all((value for key, value in self.restart_states.items())):
-            self._handle_full_restart(session.id, session.game_id)
+        if all((value for key, value in restart_states.items())):
+            self._handle_full_restart(session.game_id)
             filter_self = False
 
         return self._default_messages(
@@ -48,35 +39,6 @@ class RestartMessageHandler(BaseMessageHandler):
             filter_self=filter_self,
         )
 
-    def _handle_full_restart(self, session_id: int, game_id: int) -> None:
-        game = self.db_session.query(Game).filter(Game.id == game_id).first()
-        current_round = self.db_session.query(Round).filter(
-            Round.game_id == game_id
-        ).filter(
-            Round.completed == false()
-        ).first()
-        current_round.completed = True
-        # also clear out redis state for game... or should we just be using the round id?
-        # round_id
-        self.db_session.add(current_round)
-        self.db_session.commit()
-
-        round = Round(
-            game_id=game.id,
-        )
-        self.db_session.add(round)
-        self.db_session.commit()
-        logger.info("Committed round!")
-
-        self.db_session.add(SetUpPhase(round_id=round.id))
-        self.db_session.add(CluePhase(round_id=round.id))
-        self.db_session.add(VotePhase(round_id=round.id))
-        self.db_session.add(RevealPhase(round_id=round.id))
-        self.db_session.commit()
-        logger.info("Committed phases!")
-
-        session = self.db_session.query(Session).filter_by(id=session_id).first()
-        session.game_id = game.id
-        self.db_session.add(session)
-        self.db_session.commit()
-        logger.info(f"Added game_id: {game.id} to session with id: {session.id}")
+    def _handle_full_restart(self, game_id: int) -> None:
+        game_state_service = GameStateService(db_session=self.db_session)
+        game_state_service.start_new_round(game_id=game_id)
