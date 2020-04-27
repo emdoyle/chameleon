@@ -8,6 +8,8 @@ from json import loads, dumps
 class OutgoingMessage:
     data = attr.ib(type=Dict)
 
+    # TODO: reconsider this immutable-style stuff
+
     def add_chameleon(self) -> 'OutgoingMessage':
         data = deepcopy(self.data)
         data['chameleon'] = True
@@ -16,6 +18,11 @@ class OutgoingMessage:
     def add_is_clue_turn(self) -> 'OutgoingMessage':
         data = deepcopy(self.data)
         data['is_clue_turn'] = True
+        return OutgoingMessage(data=data)
+
+    def add_reset(self) -> 'OutgoingMessage':
+        data = deepcopy(self.data)
+        data['reset'] = True
         return OutgoingMessage(data=data)
 
 

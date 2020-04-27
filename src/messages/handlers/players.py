@@ -13,4 +13,4 @@ class PlayerMessageHandler(BaseMessageHandler):
         if message['kind'] != 'players':
             raise ValueError("PlayerMessageHandler expects messages of kind 'players'")
 
-        return self._default_messages(game_id=session.game_id, session_id=session.id, filter_self=False)
+        return self._default_messages(game_id=session.game_id)

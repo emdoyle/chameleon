@@ -6,6 +6,7 @@ services:
       - "8888:8888"
     volumes:
       - ./assets/build:/root/assets/build
+      - ./src:/root/src
     environment:
       COOKIE_SECRET: "${COOKIE_SECRET}"
       DB_HOST: postgres

@@ -37,17 +37,11 @@ class ReadyMessageHandler(BaseMessageHandler):
         game_state_service.set_ready_state(session.id, session.game_id, ready_state)
         ready_states = game_state_service.ready_states_for_game(session.game_id)
         logger.debug('Ready states: %s', ready_states)
-        filter_self = True  # TODO: this is some weird stuff
 
         if all((value for key, value in ready_states.items())):
             self._handle_full_ready(session.game_id)
-            filter_self = False
 
-        return self._default_messages(
-            game_id=session.game_id,
-            session_id=session.id,
-            filter_self=filter_self,
-        )
+        return self._default_messages(game_id=session.game_id)
 
     def _handle_full_ready(self, game_id: int) -> None:
         # TODO: cache this in thread

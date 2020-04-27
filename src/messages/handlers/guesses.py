@@ -50,4 +50,4 @@ class GuessMessageHandler(BaseMessageHandler):
             raise ValueError("Guess message must contain a 'guess' key")
 
         self._update_game_state(session, guess, self._check_guess(session, guess))
-        return self._default_messages(game_id=session.game_id, session_id=session.id, filter_self=False)
+        return self._default_messages(game_id=session.game_id)

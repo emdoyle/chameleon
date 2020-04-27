@@ -73,4 +73,4 @@ class VoteMessageHandler(BaseMessageHandler):
                 self._update_game_state(session, vote)
         elif action == 'clear':
             self._update_game_state(session, None)
-        return self._default_messages(game_id=session.game_id, session_id=session.id, filter_self=False)
+        return self._default_messages(game_id=session.game_id)

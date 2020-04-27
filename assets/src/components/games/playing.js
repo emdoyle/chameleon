@@ -89,6 +89,7 @@ export default function PlayingChameleon() {
     const [showModalButton, setShowModalButton] = React.useState(false);
     const [showModal, setShowModal] = React.useState(false);
     const [showWinnerModal, setShowWinnerModal] = React.useState(false);
+    const [winnerModalShown, setWinnerModalShown] = React.useState(false);
     const [cardImagePath, setCardImagePath] = React.useState('');
     const [showCategoryCard, setShowCategoryCard] = React.useState(false);
     const [categoryImagePath, setCategoryImagePath] = React.useState('');
@@ -100,6 +101,16 @@ export default function PlayingChameleon() {
     }));
 
     const handleGameStateMessage = (message) => {
+        // TODO: should be better prepared for different message types
+        if (message.reset) {
+            setYourClue('');
+            setYourVote('');
+            setVoteLockedIn(false);
+            setReady(false);
+            setRestart(false);
+            setWinnerModalShown(false);
+        }
+
         setPlayers(message.players || []);
         const {
             phase: newPhase = '',
@@ -110,7 +121,6 @@ export default function PlayingChameleon() {
             winner: newWinner = '',
         } = message.round;
         setPhase(newPhase);
-        // TODO: handle completed state
         setClues(newClue.clues || {});
         setVotes(newVote.votes || {});
         setChameleonGuess(newReveal.guess || '');
@@ -344,11 +354,14 @@ export default function PlayingChameleon() {
                 onClose={() => setShowModal(false)}
             />
             <WinnerModal
-                open={showWinnerModal}
+                open={showWinnerModal && !winnerModalShown}
                 value={winner}
                 chameleonGuess={chameleonGuess}
                 correctAnswer={correctAnswer}
-                onClose={() => setShowWinnerModal(false)}
+                onClose={() => {
+                    setWinnerModalShown(true);
+                    setShowWinnerModal(false);
+                }}
             />
         </React.Fragment>
     )

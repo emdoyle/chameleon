@@ -145,7 +145,9 @@ class BaseMessageHandler(AbstractMessageHandler):
         self.db_session.add(current_round)
         self.db_session.commit()  # TODO: already in weird territory when it comes to committing unexpectedly
 
-    def _default_messages(self, game_id: int, session_id: int, filter_self: bool = True) -> 'OutgoingMessages':
+    def _default_messages(
+            self, game_id: int, reset: bool = False
+    ) -> 'OutgoingMessages':
         game_state_service = GameStateService(db_session=self.db_session)
         connected_sessions = game_state_service.connected_sessions_in_game(game_id=game_id)
         ready_states = game_state_service.ready_states_for_game(game_id=game_id)
@@ -162,9 +164,6 @@ class BaseMessageHandler(AbstractMessageHandler):
 
         messages = {}
         for session_in_game in sessions_in_game:
-            if filter_self and session_in_game.id == session_id:
-                continue
-
             message_to_send = full_game_state_message
             if chameleon_session_id is not None and session_in_game.id == chameleon_session_id:
                 logger.debug("Showing session %s that they are the chameleon!", session_in_game.id)
@@ -172,5 +171,8 @@ class BaseMessageHandler(AbstractMessageHandler):
             if clue_turn_session_id is not None and session_in_game.id == clue_turn_session_id:
                 logger.debug("Showing session %s that it is their turn to give a clue!", session_in_game.id)
                 message_to_send = message_to_send.add_is_clue_turn()
+            if reset:
+                logger.debug("Showing all sessions that this is a reset message")
+                message_to_send = message_to_send.add_reset()
             messages[session_in_game.id] = [message_to_send]
         return OutgoingMessages(messages=messages)

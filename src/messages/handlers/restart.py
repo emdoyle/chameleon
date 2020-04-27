@@ -27,17 +27,13 @@ class RestartMessageHandler(BaseMessageHandler):
         )
         restart_states = game_state_service.restart_states_for_game(game_id=session.game_id)
         logger.debug('Restart states: %s', restart_states)
-        filter_self = True  # TODO: this is some weird stuff
+        reset = False
 
         if all((value for key, value in restart_states.items())):
             self._handle_full_restart(session.game_id)
-            filter_self = False
+            reset = True
 
-        return self._default_messages(
-            game_id=session.game_id,
-            session_id=session.id,
-            filter_self=filter_self,
-        )
+        return self._default_messages(game_id=session.game_id, reset=reset)
 
     def _handle_full_restart(self, game_id: int) -> None:
         game_state_service = GameStateService(db_session=self.db_session)

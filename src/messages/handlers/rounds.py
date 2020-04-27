@@ -18,4 +18,4 @@ class RoundMessageHandler(BaseMessageHandler):
         # create a new well-formed round under the same game id
         # and send a full state message to everyone
 
-        return self._default_messages(game_id=session.game_id, session_id=session.id, filter_self=False)
+        return self._default_messages(game_id=session.game_id)

@@ -50,4 +50,4 @@ class ClueMessageHandler(BaseMessageHandler):
             raise ValueError("Clue message must contain 'clue' key")
         if self._validate_clue(clue):
             self._update_game_state(session, clue, connected_sessions)
-        return self._default_messages(game_id=session.game_id, session_id=session.id, filter_self=False)
+        return self._default_messages(game_id=session.game_id)
