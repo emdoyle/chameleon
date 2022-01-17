@@ -1,7 +1,7 @@
 __all__ = [
-    'SessionAPIHandler',
-    'UserAPIHandler',
-    'GameAPIHandler',
+    "SessionAPIHandler",
+    "UserAPIHandler",
+    "GameAPIHandler",
 ]
 
 from .session import SessionAPIHandler

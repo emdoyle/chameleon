@@ -26,7 +26,4 @@ REDIS_MAIN_DB_NO = env("REDIS_MAIN_DB_NO", "0")
 
 COOKIE_SECRET = env("COOKIE_SECRET", "")
 
-CORS_ORIGINS = [
-    'localhost',
-    'evandoyle.net'
-]
+CORS_ORIGINS = ["localhost", "evandoyle.net"]

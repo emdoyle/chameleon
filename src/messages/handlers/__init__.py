@@ -1,10 +1,10 @@
 __all__ = [
-    'PlayerMessageHandler',
-    'ReadyMessageHandler',
-    'ClueMessageHandler',
-    'VoteMessageHandler',
-    'GuessMessageHandler',
-    'RestartMessageHandler',
+    "PlayerMessageHandler",
+    "ReadyMessageHandler",
+    "ClueMessageHandler",
+    "VoteMessageHandler",
+    "GuessMessageHandler",
+    "RestartMessageHandler",
 ]
 
 from .players import PlayerMessageHandler

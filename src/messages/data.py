@@ -10,19 +10,19 @@ class OutgoingMessage:
 
     # TODO: reconsider this immutable-style stuff
 
-    def add_chameleon(self) -> 'OutgoingMessage':
+    def add_chameleon(self) -> "OutgoingMessage":
         data = deepcopy(self.data)
-        data['chameleon'] = True
+        data["chameleon"] = True
         return OutgoingMessage(data=data)
 
-    def add_is_clue_turn(self) -> 'OutgoingMessage':
+    def add_is_clue_turn(self) -> "OutgoingMessage":
         data = deepcopy(self.data)
-        data['is_clue_turn'] = True
+        data["is_clue_turn"] = True
         return OutgoingMessage(data=data)
 
-    def add_reset(self) -> 'OutgoingMessage':
+    def add_reset(self) -> "OutgoingMessage":
         data = deepcopy(self.data)
-        data['reset'] = True
+        data["reset"] = True
         return OutgoingMessage(data=data)
 
 
@@ -30,21 +30,19 @@ class OutgoingMessage:
 class OutgoingMessages:
     messages = attr.ib(type=Dict[int, List[OutgoingMessage]], default=dict)
 
-    def merge(self, other: 'OutgoingMessages') -> 'OutgoingMessages':
+    def merge(self, other: "OutgoingMessages") -> "OutgoingMessages":
         merged_messages = {**self.messages}
         for key, value in other.messages:
             if key in merged_messages:
                 merged_messages[key].extend(value)
             else:
                 merged_messages[key] = value
-        return OutgoingMessages(
-            messages=merged_messages
-        )
+        return OutgoingMessages(messages=merged_messages)
 
     # TODO: could really go crazy with abstractions here... not necessary now
     def serialize_as_json(self) -> str:
         return dumps(attr.asdict(self))
 
     @classmethod
-    def deserialize_from_json(cls, serialized_messages: str) -> 'OutgoingMessages':
+    def deserialize_from_json(cls, serialized_messages: str) -> "OutgoingMessages":
         return cls(**loads(serialized_messages))

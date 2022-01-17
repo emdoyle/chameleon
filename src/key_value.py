@@ -1,12 +1,7 @@
 import logging
 from redis import Redis, exceptions as redis_exceptions
 from aioredis import create_redis_pool
-from src.settings import (
-    REDIS_HOST,
-    REDIS_PORT,
-    REDIS_MAIN_DB_NO,
-    LOGGER_NAME
-)
+from src.settings import REDIS_HOST, REDIS_PORT, REDIS_MAIN_DB_NO, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -14,7 +9,7 @@ r = Redis(
     host=REDIS_HOST,
     port=int(REDIS_PORT),
     db=int(REDIS_MAIN_DB_NO),
-    charset='utf-8',
+    charset="utf-8",
     decode_responses=True,
 )
 
@@ -26,8 +21,7 @@ class AIORedisContainer:
     @classmethod
     async def set_client(cls):
         cls.__client = await create_redis_pool(
-            address=(REDIS_HOST, int(REDIS_PORT)),
-            db=int(REDIS_MAIN_DB_NO)
+            address=(REDIS_HOST, int(REDIS_PORT)), db=int(REDIS_MAIN_DB_NO)
         )
 
     @classmethod

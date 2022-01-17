@@ -1,17 +1,11 @@
-from src.settings import (
-    DB_HOST,
-    DB_PORT,
-    DB_USER,
-    DB_NAME,
-    DB_PASSWORD
-)
+from src.settings import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASSWORD
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, JSON, ForeignKey
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship, sessionmaker
 
 Engine = create_engine(
-    f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 DBSession = sessionmaker(bind=Engine)
 
@@ -19,23 +13,23 @@ Base = declarative_base()
 
 
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     username = Column(String)
     session = relationship("Session", uselist=False, backref="user")
 
 
 class Session(Base):
-    __tablename__ = 'sessions'
+    __tablename__ = "sessions"
 
     id = Column(Integer, primary_key=True)
     session_id = Column(String)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    game_id = Column(Integer, ForeignKey('games.id'))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    game_id = Column(Integer, ForeignKey("games.id"))
 
 
 class Game(Base):
-    __tablename__ = 'games'
+    __tablename__ = "games"
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
@@ -44,11 +38,11 @@ class Game(Base):
 
 
 class Round(Base):
-    __tablename__ = 'rounds'
+    __tablename__ = "rounds"
 
     id = Column(Integer, primary_key=True)
-    game_id = Column(Integer, ForeignKey('games.id'))
-    phase = Column(String, default='set_up')
+    game_id = Column(Integer, ForeignKey("games.id"))
+    phase = Column(String, default="set_up")
     completed = Column(Boolean, default=False)
     winner = Column(String)
     set_up_phase = relationship("SetUpPhase", uselist=False, backref="round")
@@ -58,11 +52,13 @@ class Round(Base):
 
 
 class SetUpPhase(Base):
-    __tablename__ = 'setup_phases'
+    __tablename__ = "setup_phases"
 
     id = Column(Integer, primary_key=True)
-    round_id = Column(Integer, ForeignKey('rounds.id'))
-    chameleon_session_id = Column(Integer)  # not using a FKey to avoid linking tables and for on_delete simplicity
+    round_id = Column(Integer, ForeignKey("rounds.id"))
+    chameleon_session_id = Column(
+        Integer
+    )  # not using a FKey to avoid linking tables and for on_delete simplicity
     category = Column(String)
     big_die_roll = Column(Integer)
     small_die_roll = Column(Integer)
@@ -70,27 +66,27 @@ class SetUpPhase(Base):
 
 
 class CluePhase(Base):
-    __tablename__ = 'clue_phases'
+    __tablename__ = "clue_phases"
 
     id = Column(Integer, primary_key=True)
-    round_id = Column(Integer, ForeignKey('rounds.id'))
+    round_id = Column(Integer, ForeignKey("rounds.id"))
     clues = Column(JSON, default=dict)
 
 
 class VotePhase(Base):
-    __tablename__ = 'vote_phases'
+    __tablename__ = "vote_phases"
 
     id = Column(Integer, primary_key=True)
-    round_id = Column(Integer, ForeignKey('rounds.id'))
+    round_id = Column(Integer, ForeignKey("rounds.id"))
     votes = Column(JSON, default=dict)
     final_vote = Column(String)
 
 
 class RevealPhase(Base):
-    __tablename__ = 'reveal_phases'
+    __tablename__ = "reveal_phases"
 
     id = Column(Integer, primary_key=True)
-    round_id = Column(Integer, ForeignKey('rounds.id'))
+    round_id = Column(Integer, ForeignKey("rounds.id"))
     guess = Column(String)
 
 

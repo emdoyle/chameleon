@@ -3,7 +3,9 @@ from tornado.web import RequestHandler
 from tornado.escape import json_encode
 from src.db import DBSession, Session
 from src.settings import LOGGER_NAME
-from ..game_state import GameStateHandler  # TODO: this should be done with redis to avoid import
+from ..game_state import (
+    GameStateHandler,
+)  # TODO: this should be done with redis to avoid import
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -23,19 +25,23 @@ class SessionAPIHandler(RequestHandler):
             return
         self.set_status(status_code=200)
         if session.game_id is not None:
-            self.write(json_encode({'has_session': True, 'has_game': True}))
+            self.write(json_encode({"has_session": True, "has_game": True}))
             return
-        self.write(json_encode({'has_session': True}))
+        self.write(json_encode({"has_session": True}))
         db_session.close()
 
     async def delete(self):
         session_id = self.get_secure_cookie(name="session_id")
         db_session = DBSession()
         if session_id:
-            session = db_session.query(Session).filter(Session.id == int(session_id)).first()
+            session = (
+                db_session.query(Session).filter(Session.id == int(session_id)).first()
+            )
             if session:
                 # TODO: this should probably be done through a redis channel as well
-                GameStateHandler.clear_session(session_id=int(session_id), game_id=int(session.game_id))
+                GameStateHandler.clear_session(
+                    session_id=int(session_id), game_id=int(session.game_id)
+                )
                 logger.debug("Cleared session %s from websocket handler", session_id)
                 db_session.delete(session)
                 db_session.commit()

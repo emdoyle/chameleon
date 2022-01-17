@@ -10,26 +10,27 @@ from src.server import (
     KeycardHandler,
     PublicAssetHandler,
 )
-from src.constants import (
-    CARD_PATHS,
-)
+from src.constants import CARD_PATHS
 from src.key_value import AIORedisContainer  # TODO: can pinject help here?
 from src.db import init_db
 
 
 def make_app():
-    return tornado.web.Application([
-        (r"/websocket", GameStateHandler),
-        (r"/api/v1/session", SessionAPIHandler),
-        (r"/api/v1/user", UserAPIHandler),
-        (r"/api/v1/games", GameAPIHandler),
-        (CARD_PATHS, KeycardHandler, {'path': BUILD_PATH}),
-        (r"/{}(.*)".format(BUILD_PATH), PublicAssetHandler, {'path': BUILD_PATH}),
-        (r"/(.*)", RootHandler, {'path': BUILD_PATH}),
-    ], cookie_secret=COOKIE_SECRET)
+    return tornado.web.Application(
+        [
+            (r"/websocket", GameStateHandler),
+            (r"/api/v1/session", SessionAPIHandler),
+            (r"/api/v1/user", UserAPIHandler),
+            (r"/api/v1/games", GameAPIHandler),
+            (CARD_PATHS, KeycardHandler, {"path": BUILD_PATH}),
+            (r"/{}(.*)".format(BUILD_PATH), PublicAssetHandler, {"path": BUILD_PATH}),
+            (r"/(.*)", RootHandler, {"path": BUILD_PATH}),
+        ],
+        cookie_secret=COOKIE_SECRET,
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     init_db()
     app = make_app()
     app.listen(int(PORT))

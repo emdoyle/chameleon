@@ -1,11 +1,4 @@
-__all__ = [
-    'CATEGORIES',
-    'KEYCARD',
-    'decode'
-]
+__all__ = ["CATEGORIES", "KEYCARD", "decode"]
 
-from .root import (
-    CATEGORIES,
-    KEYCARD
-)
+from .root import CATEGORIES, KEYCARD
 from .helpers import decode

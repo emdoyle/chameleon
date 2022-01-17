@@ -18,33 +18,26 @@ class UserAPIHandler(RequestHandler):
 
         try:
             json_data = json_decode(self.request.body)
-            username = json_data['username']
+            username = json_data["username"]
         except (ValueError, KeyError):
             logger.error("Did not receive username.")
             self.send_error(status_code=400)
             return
 
         db_session = DBSession()
-        new_user = User(
-            username=username
-        )
+        new_user = User(username=username)
         logger.info(f"About to create user: {new_user}")
         db_session.add(new_user)
         db_session.commit()
         logger.info("Committed user!")
 
-        new_session = Session(
-            user_id=new_user.id,
-        )
+        new_session = Session(user_id=new_user.id,)
         logger.info(f"About to create session: {new_session}")
         db_session.add(new_session)
         db_session.commit()
         logger.info("Committed session!")
 
-        self.set_secure_cookie(
-            name="session_id",
-            value=str(new_session.id)
-        )
+        self.set_secure_cookie(name="session_id", value=str(new_session.id))
 
         self.set_status(status_code=200)
-        self.write(json_encode({'success': True}))
+        self.write(json_encode({"success": True}))

@@ -19,6 +19,7 @@ fileConfig(config.config_file_name)
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from src.db import Base
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -26,20 +27,14 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-from src.settings import (
-    DB_HOST,
-    DB_PORT,
-    DB_USER,
-    DB_NAME,
-    DB_PASSWORD
-)
+from src.settings import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASSWORD
+
 config_section = config.config_ini_section
 config.set_section_option(config_section, "DB_USER", DB_USER)
 config.set_section_option(config_section, "DB_PASSWORD", DB_PASSWORD)
 config.set_section_option(config_section, "DB_HOST", DB_HOST)
 config.set_section_option(config_section, "DB_PORT", DB_PORT)
 config.set_section_option(config_section, "DB_NAME", DB_NAME)
-
 
 
 def run_migrations_offline():
@@ -80,9 +75,7 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
